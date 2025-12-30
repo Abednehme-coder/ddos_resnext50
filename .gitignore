@@ -6,12 +6,10 @@ __pycache__/
 data/
 images/
 pcaps/
-*.mindir
 *.ckpt
 
 # Large checkpoints and exports
 models/*.ckpt
-models/*.mindir
 
 # Misc
 .DS_Store
