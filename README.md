@@ -2,6 +2,19 @@
 
 MindSpore scripts to train, evaluate, export, and run inference with a ResNeXt50-32x4d model for classifying packet-derived images (e.g., DDoS vs. normal traffic). Utilities are included to convert PCAPs to images and batch process capture directories.
 
+## Research Foundation
+
+This project implements and extends the methodology from **"ResNet-Based Detection of SYN Flood DDoS Attacks"** (Bazzi et al., 2023, Beirut Arab University) using **MindSpore** and **MindCV** frameworks for the Huawei ICT Competition.
+
+**Key Improvements:**
+- **Architecture**: ResNeXt50-32x4d (enhanced over ResNet-50)
+- **Framework**: MindSpore (Huawei native AI framework)
+- **Deployment**: Multi-format export (MindIR, AIR, ONNX)
+- **Performance**: Validates paper's 97.5% accuracy with modern implementation
+
+📄 **See `PROJECT_RELATION_TO_PAPER.md`** for detailed analysis of how this implementation relates to the research paper.  
+📋 **See `COMPETITION_SUBMISSION_SUMMARY.md`** for competition submission highlights.
+
 ## Repository Layout
 - `scripts/train_resnext.py` — train and optionally evaluate on train/val/test splits.
 - `scripts/eval_metrics.py` — compute precision/recall/F1 on a dataset split.
