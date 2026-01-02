@@ -6,7 +6,7 @@ from mindspore import nn, ops
 import mindspore.dataset as ds
 import mindspore.dataset.vision as vision
 from mindspore.train import Model
-from mindspore.train.callback import LossMonitor, TimeMonitor, ModelCheckpoint, CheckpointConfig
+from mindspore.train.callback import LossMonitor, TimeMonitor, ModelCheckpoint, CheckpointConfig, Callback
 from mindspore import load_checkpoint, load_param_into_net
 
 # MindSpore 1.8 lacks nn.SiLU; add a minimal implementation for mindcv.
@@ -17,6 +17,7 @@ if not hasattr(nn, "SiLU"):
     nn.SiLU = SiLU  # type: ignore
 
 from mindcv.models import create_model
+from eval_metrics import compute_metrics, make_dataset as make_eval_dataset
 
 def make_dataset(data_root, split, batch_size, shuffle):
     path = os.path.join(data_root, split)
@@ -70,6 +71,51 @@ def build_model(num_classes, lr, ckpt_path=None):
     return model
 
 
+def run_eval(model, dataset, label_col, class_to_idx, split_name):
+    """Compute per-class precision/recall/F1 using the shared eval helper."""
+    idx_to_class = {v: k for k, v in class_to_idx.items()}
+    num_classes = len(idx_to_class)
+
+    all_labels = []
+    all_preds = []
+    for batch in dataset.create_dict_iterator(output_numpy=True):
+        images = batch["image"]
+        labels = batch[label_col]
+        logits = model.predict(ms.Tensor(images)).asnumpy()
+        preds = logits.argmax(axis=1)
+        all_labels.extend(labels.tolist())
+        all_preds.extend(preds.tolist())
+
+    metrics = compute_metrics(all_labels, all_preds, num_classes)
+    print(f"\n[{split_name}] samples={len(all_labels)}")
+    for idx, (prec, rec, f1, tp, fp, fn) in enumerate(metrics):
+        cname = idx_to_class.get(idx, str(idx))
+        print(f"  {cname}: precision={prec:.4f} recall={rec:.4f} f1={f1:.4f} tp={tp} fp={fp} fn={fn}")
+    return metrics
+
+
+class EvalCallback(Callback):
+    """Run validation metrics at the end of each epoch."""
+
+    def __init__(self, model, dataset, label_col, class_to_idx):
+        super().__init__()
+        self.model = model
+        self.dataset = dataset
+        self.label_col = label_col
+        self.class_to_idx = class_to_idx
+
+    def epoch_end(self, run_context):
+        cb_params = run_context.original_args()
+        epoch = cb_params.cur_epoch_num
+        run_eval(
+            self.model,
+            self.dataset,
+            self.label_col,
+            self.class_to_idx,
+            split_name=f"Validation epoch {epoch}",
+        )
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Train/Eval ResNeXt50 on packet images.")
     parser.add_argument("--data-root", default="/workspace/ddos_data/images_balanced", help="Dataset root with train/val/test.")
@@ -88,8 +134,8 @@ def main():
     ms.set_context(mode=ms.PYNATIVE_MODE, device_target=args.device_target)
 
     train_ds = make_dataset(args.data_root, "train", args.batch_size, True)
-    val_ds   = make_dataset(args.data_root, "val", args.batch_size, False)
-    test_ds  = make_dataset(args.data_root, "test", args.batch_size, False)
+    val_ds, val_label_col, val_class_to_idx = make_eval_dataset(args.data_root, "val", args.batch_size, shuffle=False)
+    test_ds, test_label_col, test_class_to_idx = make_eval_dataset(args.data_root, "test", args.batch_size, shuffle=False)
 
     model = build_model(args.num_classes, args.lr, args.ckpt)
 
@@ -99,16 +145,16 @@ def main():
         ckpt_config = CheckpointConfig(save_checkpoint_steps=100, keep_checkpoint_max=3)
         ckpt_cb = ModelCheckpoint(prefix="resnext50", directory="./models", config=ckpt_config)
 
+        eval_cb = EvalCallback(model, val_ds, val_label_col, val_class_to_idx)
         model.train(
             args.epochs,
             train_ds,
-            callbacks=[LossMonitor(), TimeMonitor(), ckpt_cb],
+            callbacks=[LossMonitor(), TimeMonitor(), ckpt_cb, eval_cb],
             dataset_sink_mode=False
         )
 
     print("\nEvaluating on test set...\n")
-    metrics = model.eval(test_ds, dataset_sink_mode=False)
-    print(metrics)
+    run_eval(model, test_ds, test_label_col, test_class_to_idx, split_name="Test")
 
 
 if __name__ == "__main__":
