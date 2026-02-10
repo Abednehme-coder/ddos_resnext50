@@ -1,0 +1,224 @@
+================================================================================
+AI-BASED DETECTION OF SYN FLOOD DDoS ATTACKS
+System Description Document
+================================================================================
+
+1. TITLE AND ABSTRACT
+--------------------------------------------------------------------------------
+
+Title: AI-Based Detection of SYN Flood DDoS Attacks Using ResNeXt-50 and 
+       Deep Learning on Packet Images
+
+Abstract:
+This work presents a deep learning approach for detecting SYN flood Distributed
+Denial of Service (DDoS) attacks. Raw network traffic (PCAP files) is converted
+into 2D grayscale images, which are then classified using a ResNeXt-50 
+convolutional neural network. The system was developed for the Huawei 
+Innovation Competition, trained and evaluated on the CICDDoS2019 dataset using
+Huawei MindSpore framework. The methodology achieves strong performance:
+test F1 ~95.56%, blind test 100% on 10 images, and 99.9% accuracy / 0.9993 
+Macro F1 on a large blind test of 3000 held-out images. Based on the research
+paper "ResNet-Based Detection of SYN Flood DDoS Attacks."
+
+
+2. INTRODUCTION AND MOTIVATION
+--------------------------------------------------------------------------------
+
+Problem Statement:
+DDoS attacks, particularly SYN flood attacks, overwhelm servers by exploiting
+the TCP handshake mechanism. Traditional detection methods struggle with the
+evolving complexity of attacks. Deep learning can learn patterns directly from
+traffic data for effective detection.
+
+Objectives:
+- Detect SYN flood DDoS vs. normal traffic using packet-to-image conversion
+- Utilize Huawei MindSpore and ResNeXt-50 architecture
+- Validate performance on CICDDoS2019 and blind test scenarios
+
+
+3. RELATED WORK
+--------------------------------------------------------------------------------
+
+This project builds upon the methodology from "ResNet-Based Detection of SYN 
+Flood DDoS Attacks" (Bazzi et al., Beirut Arab University), which:
+- Converts packet bytes into 2D grayscale images
+- Uses deep CNNs (ResNet) for binary classification
+- Achieves high accuracy on CICDDoS2019
+
+Our implementation extends this by using ResNeXt-50 (32x4d) instead of 
+ResNet-50, and implements the full pipeline with Huawei MindSpore.
+
+
+4. DATASET
+--------------------------------------------------------------------------------
+
+Source: CICDDoS2019 (Canadian Institute for Cybersecurity)
+- Contains realistic benign and DDoS traffic
+- Includes SYN flood attacks and normal traffic
+- Used for train, validation, and test splits
+
+Data Processing Pipeline:
+1. PCAP extraction from CICDDoS2019 zip files
+2. Classification: PCAPs with >100 TCP SYN packets -> DDoS, else -> normal
+3. Packet-to-image conversion: raw bytes -> 2D grayscale -> 224x224 pixels
+4. For DDoS: only TCP SYN packets converted (--syn-only)
+5. For normal: all packets converted
+6. Images organized into train/val/test with ddos/ and normal/ subfolders
+
+
+5. METHODOLOGY
+--------------------------------------------------------------------------------
+
+5.1 Architecture: ResNeXt-50 32x4d
+- Deep CNN with grouped convolutions (32 groups, 4d width)
+- Input: 224x224 RGB (grayscale replicated to 3 channels)
+- Output: 2 classes (DDoS, normal)
+- Implemented via mindcv library
+
+5.2 Image Preprocessing
+- Training: RandomResizedCrop(224), RandomHorizontalFlip
+- Eval/Test: Resize 256 -> CenterCrop 224
+- ImageNet normalization: mean [0.485, 0.456, 0.406], std [0.229, 0.224, 0.225]
+
+5.3 Training Configuration
+- Framework: Huawei MindSpore (Graph mode)
+- Optimizer: Adam / AdamWeightDecay
+- Learning rate: 1e-3, Weight decay: 1e-4
+- Batch size: 16, Epochs: 8
+- Loss: Weighted Cross-Entropy (class-balanced)
+- Best checkpoint selection: Macro F1 score on validation set
+
+5.4 Class Imbalance
+- Automatic class weights computed from training set
+- WeightedCrossEntropyLoss applied per sample
+
+
+6. IMPLEMENTATION
+--------------------------------------------------------------------------------
+
+Software Stack:
+- Huawei MindSpore
+- mindcv (model creation)
+- NumPy, Pillow
+
+Key Scripts:
+- convert_pcaps_to_images.sh   : Batch PCAP-to-image conversion
+- classify_pcap_syn.py         : SYN-based PCAP labeling
+- pcap_to_images.py            : Packet-to-224x224 image conversion
+- process_zips_in_batches.sh   : Process CICDDoS2019 zip files
+- move_images_to_class_folders.py : Organize images by class
+- train_resnext.py             : Training and evaluation
+- blind_test_random.py         : Unbiased inference (--split test --total 3000 for large blind test)
+
+
+7. RESULTS
+--------------------------------------------------------------------------------
+
+Test Set Performance:
+- Test Macro F1: ~95.56%
+- Test Accuracy: ~95.56%
+
+Blind Test (Holdout Validation):
+- Small test: 5 random images from DDoS, 5 from normal (seed=42) -> 10/10 correct (100%)
+- Large blind test (3000 images, 1500 per class) - exact output:
+
+    Split: test | Picked 3000 random images (1500 per class), order shuffled.
+
+    Confusion Matrix (rows=true, cols=predicted):
+                    ddos  normal
+      ddos          1498       2
+      normal           0    1500
+
+    Accuracy: 2998/3000 = 99.9%
+    Macro F1: 0.9993
+      DDoS   - Precision: 1.0000, Recall: 0.9987, F1: 0.9993
+      Normal - Precision: 0.9987, Recall: 1.0000, F1: 0.9993
+
+- Command: python scripts/blind_test_random.py --data-root ./dataset/images --split test --total 3000
+- Order shuffled; model receives images only; batch inference
+
+Checkpoints: model/resnext50_32x4d_best.ckpt, resnext50_32x4d-{4..8}_9556.ckpt
+
+
+8. REPRODUCIBILITY
+--------------------------------------------------------------------------------
+
+- Fixed random seed (42)
+- All scripts and configurations in repository
+- Dataset: CICDDoS2019 (public)
+- Framework: MindSpore, mindcv
+
+
+9. CONTRIBUTIONS AND NOVELTY
+--------------------------------------------------------------------------------
+
+What This Work Upgrades and What Makes It Special:
+
+1. ARCHITECTURE UPGRADE: ResNeXt-50 vs ResNet-50
+   - Prior work (Bazzi et al.) used ResNet-50. We use ResNeXt-50 32x4d.
+   - ResNeXt introduces "cardinality" (grouped convolutions) for richer feature
+     learning with similar parameter count.
+   - Better suited to subtle pattern differences between DDoS and normal packets.
+
+2. HUAWEI MINDSPORE ECOSYSTEM
+   - Full implementation on Huawei MindSpore, enabling deployment on Ascend NPUs
+     and Huawei cloud infrastructure.
+   - MindSpore Graph mode for efficient inference; compatibility with mindcv.
+   - First open, reproducible DDoS packet-image classifier on MindSpore.
+
+3. END-TO-END AUTOMATED PIPELINE
+   - Lightweight SYN-based PCAP labeling (no Wireshark/Scapy dependency for
+     classification); early-exit for fast DDoS detection.
+   - Packet-to-image conversion follows published methodology (2D grayscale,
+     224x224) with minimal dependencies (PIL, NumPy).
+   - Batch processing of CICDDoS2019 zips; class-balanced training.
+
+4. RIGOROUS BLIND TESTING
+   - Large-scale blind test support (~3000 images) on held-out test set.
+   - Model receives only images; no label leakage. Reports confusion matrix,
+     per-class precision/recall/F1.
+   - Reproducible with fixed seed for fair comparison.
+
+5. PRACTICAL DEPLOYMENT READINESS
+   - Class-weighted loss for imbalanced datasets.
+   - F1-driven checkpoint selection (better for security use case than accuracy).
+   - Modular scripts for PCAP processing, training, and evaluation.
+
+Comparison to Existing Solutions:
+- Traditional: Rule-based, signature-based -> brittle to new attack variants.
+- ML on features: Requires manual feature engineering; misses raw-byte patterns.
+- CNN on traffic images: Our approach combines raw-packet representation with
+  modern ResNeXt + MindSpore for Huawei ecosystem integration and production use.
+
+
+10. PROJECT STRUCTURE
+--------------------------------------------------------------------------------
+
+huawei/
+├── notebook/
+│   └── train_resnext.py       # Training pipeline
+├── scripts/
+│   ├── blind_test_random.py   # Blind test evaluation
+│   ├── classify_pcap_syn.py   # PCAP classification
+│   ├── convert_pcaps_to_images.sh
+│   ├── pcap_to_images.py      # Packet-to-image conversion
+│   ├── move_images_to_class_folders.py
+│   ├── pick_random_images_for_transfer.sh
+│   └── process_zips_in_batches.sh
+├── model/                     # Saved checkpoints
+├── dataset/images/            # train/ddos, train/normal, val, test
+├── README.md
+├── MINDSPORE_GPU_SETUP.md
+├── requirements.txt
+└── SYSTEM_DESCRIPTION.txt     # This file
+
+
+11. REFERENCES
+--------------------------------------------------------------------------------
+
+- CICDDoS2019 Dataset: Canadian Institute for Cybersecurity
+- ResNet-Based Detection of SYN Flood DDoS Attacks (Bazzi et al.)
+- Huawei MindSpore: https://www.mindspore.cn/
+- mindcv: MindSpore Computer Vision Toolkit
+
+================================================================================

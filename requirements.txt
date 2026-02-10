@@ -1,0 +1,6 @@
+# For GPU: run the pip command from https://www.mindspore.cn/install/en first
+# (e.g. mindspore-dev with nightly index), then install this file:
+#   pip install -r requirements.txt
+mindcv
+numpy
+Pillow

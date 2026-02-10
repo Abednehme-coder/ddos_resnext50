@@ -1,0 +1,6 @@
+datasets/
+data/datasets/
+dataset/
+.venv/
+model/
+*.deb
