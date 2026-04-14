@@ -114,6 +114,28 @@ Key Scripts:
 7. RESULTS
 --------------------------------------------------------------------------------
 
+7.A PRIMARY — 0.3 s TIME-WINDOW IMAGES (per_second_0p3_focal_v2)
+Checkpoint: model/per_second_0p3_focal_v2/resnext50_32x4d_best.ckpt
+Data root: dataset/images_per_second_window_0p3/ (train/val/test same 0.3s distribution)
+Recorded: 2026-04-03 (CPU eval; see reports/eval_results_per_second_0p3.md)
+
+Validation (1842 samples):
+- Overall accuracy: 98.21%
+- Macro F1: 0.9399
+- Confusion [rows=true, cols=pred]: ddos 133/0, normal 33/1676
+
+Test (1845 samples):
+- Overall accuracy: 98.10%
+- Macro F1: 0.9375
+- Confusion: ddos 135/0, normal 35/1675
+
+Blind test on test split (270 images = max equal per class; seed 42):
+- Accuracy: 267/270 = 98.9%, Macro F1: 0.9889
+- Confusion: ddos 135/0, normal 3/132
+
+Reproduce: bash scripts/run_all_eval_0p3.sh
+
+7.B LEGACY — PER-PACKET IMAGES (dataset/images, older ResNeXt checkpoint)
 Test Set Performance:
 - Test Macro F1: ~95.56%
 - Test Accuracy: ~95.56%
@@ -137,7 +159,8 @@ Blind Test (Holdout Validation):
 - Command: python scripts/blind_test_random.py --data-root ./dataset/images --split test --total 3000
 - Order shuffled; model receives images only; batch inference
 
-Checkpoints: model/resnext50_32x4d_best.ckpt, resnext50_32x4d-{4..8}_9556.ckpt
+Checkpoints: model/per_second_0p3_focal_v2/resnext50_32x4d_best.ckpt (0.3s primary);
+  model/resnext50_32x4d_best.ckpt and resnext50_32x4d-{4..8}_9556.ckpt (legacy per-packet)
 
 
 8. REPRODUCIBILITY

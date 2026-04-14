@@ -1,0 +1,37 @@
+%% Slide 18: Confusion Matrix (2x2 layout)
+%% Replace TN/FP/FN/TP values with exact numbers.
+%%{init: {"theme":"base","themeVariables":{
+  "background":"#0B2235",
+  "primaryColor":"#102F45",
+  "primaryTextColor":"#EAF4FF",
+  "primaryBorderColor":"#00C2C7",
+  "lineColor":"#00C2C7"
+}}}%%
+flowchart TB
+    H0[" "]
+    H1["Predicted: Normal"]
+    H2["Predicted: DDoS"]
+
+    R1["Actual: Normal"]
+    C11["TN\n97.8%"]
+    C12["FP\n2.2%"]
+
+    R2["Actual: DDoS"]
+    C21["FN\n1.6%"]
+    C22["TP\n98.4%"]
+
+    %% Grid alignment links
+    H0 --> H1 --> H2
+    R1 --> C11 --> C12
+    R2 --> C21 --> C22
+    H0 --- R1 --- R2
+    H1 --- C11 --- C21
+    H2 --- C12 --- C22
+
+    classDef header fill:#0E2A3D,stroke:#6FE7EA,stroke-width:1.4px,color:#EAF4FF;
+    classDef rowhdr fill:#0E2A3D,stroke:#6FE7EA,stroke-width:1.4px,color:#EAF4FF;
+    classDef cell fill:#102F45,stroke:#00C2C7,stroke-width:1.2px,color:#EAF4FF;
+
+    class H0,H1,H2 header;
+    class R1,R2 rowhdr;
+    class C11,C12,C21,C22 cell;

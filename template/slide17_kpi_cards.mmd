@@ -1,0 +1,17 @@
+%% Slide 17: KPI cards alternative
+%%{init: {"theme":"base","themeVariables":{
+  "background":"#0B2235",
+  "primaryColor":"#102F45",
+  "primaryTextColor":"#EAF4FF",
+  "primaryBorderColor":"#00C2C7",
+  "lineColor":"#00C2C7"
+}}}%%
+flowchart LR
+    A["Validation<br/><b>98.21% Acc</b><br/>93.99% Macro-F1"]
+    B["Test<br/><b>98.10% Acc</b><br/>93.75% Macro-F1"]
+    C["Blind (270)<br/><b>98.90% Acc</b><br/>98.89% Macro-F1"]
+
+    A --> B --> C
+
+    classDef card fill:#102F45,stroke:#00C2C7,stroke-width:1.5px,color:#EAF4FF;
+    class A,B,C card;

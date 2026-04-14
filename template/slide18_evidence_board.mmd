@@ -1,0 +1,25 @@
+%% Slide 18: Multi-panel evidence board layout
+%%{init: {"theme":"base","themeVariables":{
+  "background":"#0B2235",
+  "primaryColor":"#102F45",
+  "primaryTextColor":"#EAF4FF",
+  "primaryBorderColor":"#00C2C7",
+  "lineColor":"#00C2C7"
+}}}%%
+flowchart TB
+    A["ROC Curve<br/>(Test)"]
+    B["PR Curve<br/>(Test)"]
+    C["Confusion Matrix<br/>(Test + Blind)"]
+    D["Calibration / Reliability Plot"]
+    E["Reproducibility Box<br/>run_all_eval_0p3.sh<br/>run_all_paper_figures.sh"]
+
+    A --- B
+    C --- D
+    A --- C
+    B --- D
+    D --- E
+
+    classDef panel fill:#102F45,stroke:#00C2C7,stroke-width:1.5px,color:#EAF4FF;
+    classDef repro fill:#0E2A3D,stroke:#6FE7EA,stroke-width:1.5px,color:#EAF4FF;
+    class A,B,C,D panel;
+    class E repro;

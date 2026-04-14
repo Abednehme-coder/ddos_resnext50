@@ -1,0 +1,300 @@
+SYNSheild Presentation Script (Aligned to SYNSheild (4).pdf)
+
+Goal:
+- Confident, technical, honest tone
+- Smooth transitions from pitch framing to research validation
+- Clear judge-focused narrative: value -> evidence -> deployability -> transparency
+- Expand every abbreviation at first mention (then use the short form afterward)
+
+Suggested pacing:
+- Total: 12 to 15 minutes
+- Slides 1-10 (framing): ~4 to 5 min
+- Slides 11-23 (research core): ~7 to 8 min
+- Slides 24-25 (close): ~1 to 2 min
+
+------------------------------------------------------------
+SLIDE 1 - Title
+Talk track:
+Good [morning/afternoon], respected judges. I am Abed Al Rida Nehme, speaking for Team SYNSheild
+from Beirut Arab University. With me in spirit is our teammate Wafik Ibrahim—he could not be here
+today because displacement from the war has made travel impossible; we carry his work forward in
+this presentation and thank the panel for understanding. Our project is a MindSpore + ResNeXt-50
+system for early SYN-flood DDoS detection, designed for performance, reproducibility, and practical
+deployment.
+Transition:
+"Before technical details, let us briefly show how we will structure the presentation."
+
+------------------------------------------------------------
+SLIDE 2 - What We'll Cover
+Talk track:
+We split this presentation into two parts. Part A is practical framing: why this problem matters
+and what value our system creates. Part B is research evidence: architecture, methodology,
+evaluation, and deployment realism.
+Transition:
+"Now, let us look at a realistic first-minute attack timeline."
+
+------------------------------------------------------------
+SLIDE 3 - Hook Scenario (First minute)
+Talk track:
+To ground this in impact: during a Distributed Denial of Service, or DDoS, event, users may lose
+access to core services, response times spike, and operations teams are forced into incident mode.
+In the first minute of a SYN flood, risk escalates quickly. SYN means synchronize, the TCP handshake
+flag used to initiate a connection. Think of the server like a restaurant with 100 seats: attackers keep
+making fake reservations, so legitimate customers cannot sit. If we rely only on signatures and static 
+thresholds, detection canbe noisy, delayed, and brittle under traffic variation. 
+This is the operational gap we start from.
+Transition:
+"Now we revisit the same timeline and introduce the SYNSheild path."
+
+------------------------------------------------------------
+SLIDE 4 - Hook continuation / SYNSheild path
+Talk track:
+This is the same timeline, now with SYNSheild added. We process 0.3-second windows, convert them
+to images, and generate a traceable model score. The key difference is speed plus auditability.
+Transition:
+"So what is the practical difference for operators and teams?"
+
+------------------------------------------------------------
+SLIDE 5 - Without vs With SYNSheild
+Talk track:
+Without SYNSheild, teams rely on brittle rule behavior and often incomplete evaluation practices.
+With SYNSheild, we provide end-to-end traceability, fair metrics such as macro-F1, and blind-test
+evidence in a Huawei-aligned stack.
+Transition:
+"Next, we frame the background and scope as a formal research problem."
+
+------------------------------------------------------------
+SLIDE 6 - Background, Motivation, Scope
+Talk track:
+Protocol-level abuse, especially SYN flood, remains operationally relevant. As shown in the graph,
+SYN-flood Distributed Denial of Service attacks are among the most common and dangerous attack
+types in real traffic. Our motivation is earlier and more reliable Security Operations Center, or SOC,
+support. Scope is intentionally focused: binary SYN-flood detection from traffic-window images.
+Multi-attack automation is future work.
+Transition:
+"Given this scope, here is the exact problem we solve."
+
+------------------------------------------------------------
+SLIDE 7 - Problem
+Talk track:
+Our objective is early and reliable detection under real constraints: class imbalance, domain shift,
+and latency/deployment limits. This matters because availability impacts education, business,
+and public services. For example, a publicly reported CNCERT case described a large-scale DDoS
+event affecting Chinese network resources with traffic peaking above 800 Gbps, showing how fast
+operational impact can escalate.
+Transition:
+"Now we summarize our solution pipeline in one view."
+
+------------------------------------------------------------
+SLIDE 8 - Solution Snapshot
+Talk track:
+Pipeline in five steps: traffic input, SYN-oriented preprocessing and 0.3-second windowing,
+grayscale image encoding, ResNeXt-50 inference in MindSpore, and SOC output with confidence logs.
+Every stage is scriptable and auditable.
+Transition:
+"What makes this different from a generic Convolutional Neural Network, or CNN, demo?"
+
+------------------------------------------------------------
+SLIDE 9 - Innovation Highlights
+Talk track:
+Our differentiation is the combination: ResNeXt-50 capacity, short-window representation,
+imbalance-aware checkpointing using macro-F1, and an automated full pipeline from data preparation
+to blind and cross-domain checks.
+Transition:
+"From here, we shift from value framing to formal research validation."
+
+------------------------------------------------------------
+SLIDE 10 - Transition to Part B
+Talk track:
+The next section follows research logic: related work, objectives, methods, experiments,
+and reproducibility evidence.
+Transition:
+"We start by identifying where existing methods still fall short."
+
+------------------------------------------------------------
+SLIDE 11 - Related Work and Gap
+Talk track:
+Rule systems are fast but brittle, handcrafted-feature ML is explainable but engineering-heavy,
+and image-CNN literature is promising but often lacks robust blind evaluation and reproducibility.
+Our work specifically addresses these gaps.
+Transition:
+"Based on that gap, we define our research objectives."
+
+------------------------------------------------------------
+SLIDE 12 - Objectives and Hypothesis
+Talk track:
+Aim: a deployable and reproducible early SYN-flood detector. Objectives: robust image representation,
+fair MindSpore evaluation, and blind/cross-domain validation. Hypothesis: 0.3-second windows with
+ResNeXt improve practical early detection quality.
+Transition:
+"Now we show the system architecture."
+
+------------------------------------------------------------
+SLIDE 13 - System Model and Architecture
+Talk track:
+This pipeline is deterministic and modular: traffic input, labeling for testing, image generation,
+inference, and alerting. Modular stages improve isolation, debugging, and reproducibility.
+Transition (speaker handoff to Mohammad Farhat):
+"I will now hand the floor to my colleague Mohammad Farhat, who will continue the presentation
+from the data and methodology onward."
+------------------------------------------------------------
+SLIDE 14 - Data and Methodology
+Talk track (Mohammad Farhat):
+Thank you, Abed. From here I continue with our data path and methodology. We use supervised binary
+classification on CICDDoS2019-derived Packet Capture, or PCAP, and ZIP
+sources with train/val/test and blind sampling. Preprocessing is SYN-oriented and standardized to
+224x224 grayscale windows. Model is ResNeXt-50 with macro-F1-focused training policy.
+Transition:
+"Then we define evaluation and protocol rigor."
+
+------------------------------------------------------------
+SLIDE 15 - Evaluation Criteria and Setup
+Talk track:
+Primary metrics are accuracy and macro-F1; macro-F1 is essential under class imbalance. We also use
+Receiver Operating Characteristic, or ROC, and Precision-Recall, or PR, curves and a strict protocol
+with train/val/test separation, balanced blind set, and macro-F1 checkpoint selection.
+Transition:
+"Now the implementation environment and reproducibility constraints."
+
+------------------------------------------------------------
+SLIDE 16 - Environment and Requirements
+Talk track:
+Training was validated on RTX 3070-class Graphics Processing Unit, or GPU, hardware with Python 3.10,
+CUDA-compatible stack, MindSpore 2.6.0, and mindcv 0.3.0. The critical rule is representation
+consistency: train-time and deploy-time preprocessing must match.
+Transition:
+"Next, visual intuition for what the model sees."
+
+------------------------------------------------------------
+SLIDE 17 - Sample Input Windows
+Talk track:
+Normal and DDoS windows create visibly different textures. This representation is useful because it
+exposes attack structure in a way CNNs can learn effectively.
+Transition:
+"Now the headline performance results."
+
+------------------------------------------------------------
+SLIDE 18 - Performance Results
+Talk track:
+Our primary 0.3-second checkpoint achieves 98.21% validation accuracy with macro-F1 0.9399,
+98.10% test accuracy with macro-F1 0.9375, and 98.9% on a 270-sample balanced blind set
+with macro-F1 0.9889.
+Transition:
+"We now support those numbers with artifact-level evidence."
+
+------------------------------------------------------------
+SLIDE 19 - Proof Artifacts
+Talk track:
+This slide shows ROC, PR, confusion matrix, and calibration evidence, plus reproducibility commands
+and logs. The point is transparency: results can be traced and reproduced, not just presented.
+Transition:
+"How does this compare to other method families?"
+
+------------------------------------------------------------
+SLIDE 20 - Comparative Analysis
+Talk track:
+The key distinction is not only input representation. Our advantage is architecture depth plus fair
+evaluation plus full pipeline reproducibility. Rule-based and handcrafted approaches remain useful
+baselines but have known limitations under variation.
+Transition:
+"Now what these findings mean technically for real operations."
+
+------------------------------------------------------------
+SLIDE 21 - Discussion and Implications
+Talk track:
+Strong macro-F1 and blind performance indicate useful separation quality for early warning.
+Operationally, this supports SOC workflows, while threshold tuning and adaptation for new domains
+remain necessary.
+Transition:
+"Next, we connect this directly to Huawei ecosystem deployment."
+
+------------------------------------------------------------
+SLIDE 22 - Huawei Ecosystem Fit and Deployment
+Talk track:
+Our stack aligns with MindSpore and mindcv. Practical deployment pattern is router/switch telemetry
+plus nearby edge/server inference, then SOC alerting with confidence logs. We explicitly avoid
+unrealistic claims like CNN inference on every switch application-specific integrated circuit, or ASIC.
+Transition:
+"The next slide expands this into architecture-level deployment."
+
+------------------------------------------------------------
+SLIDE 23 - Practical Deployment Pattern
+Talk track:
+This architecture emphasizes realistic integration: telemetry export, nearby inference node, and SOC
+integration. It is deployment-oriented while remaining consistent with model assumptions.
+Transition:
+"Finally, we close with transparency and next steps."
+
+------------------------------------------------------------
+SLIDE 24 - Honesty, Limitations, Roadmap
+Talk track:
+We openly acknowledge constraints: limited GPU availability in some environments and current focus
+on SYN-flood class. Mitigation is clear, and roadmap is staged: near-term latency/threshold tuning,
+mid-term multi-attack expansion, long-term cloud-edge orchestration. If we advance to the finals, we
+see strong room to extend this work—for example a real Security Operations Center-style web portal
+with live dashboards and push or email notifications for high-confidence alerts—so judges can see
+the system end-to-end as an operator would.
+Transition:
+"Next, a short live demo using only logs from our deployed inference server, then we summarize and close."
+
+------------------------------------------------------------
+DEMO - Deployed server (logs only)
+Optional deck slide title: "Live demo — server inference log (tail)"
+Duration: about 1 to 2 minutes
+Setup:
+- Terminal or log viewer already open; font large enough to read; no live training, no image-generation
+  pipeline in this demo—server inference logs only.
+Live demo view — one clear line per window (time, NORMAL or DDOS, DDoS score as percent, alert yes/no).
+  From repo root:
+  bash scripts/live_detection_demo.sh
+  Example line on screen:
+  16:57:08 UTC  |  NORMAL  |  DDoS score 1.0%  |  alert no
+  Override host: ECS_HOST=ubuntu@IP bash scripts/live_detection_demo.sh
+  Verbose columns (streak, imgs, pcap): bash scripts/tail_detections_live.sh
+  Raw JSON on server: ssh ... 'sudo tail -f /var/log/synflood-detector/detections.log'
+Optional — controlled live SYN burst (your ECS only, from a second terminal on your laptop;
+  rate-limited script, not a full flood; requires sudo + hping3 or nping; Huawei ToS / abuse systems
+  may still react):
+  TARGET_IP=213.250.144.74 LIVE_DEMO_SYN_CONFIRM=yes sudo -E bash scripts/live_demo_syn_burst.sh
+  Rehearse once: model may stay NORMAL or flip to DDOS depending on rate and training mismatch; say
+  honestly what the log shows.
+Talk track:
+"To show the system running in practice, here are real lines from our deployed server-side inference
+service. Each line should include a timestamp, the window or request identifier, the predicted class—
+normal or DDoS—and a confidence score, plus any status field your service logs. This is what a
+Security Operations Center analyst would audit: traceable decisions from the model, not a black box.
+If the network is unstable, we fall back to a short screen recording of the same log tail."
+Transition:
+"With that operational proof point shown, we close with completeness and contributions."
+
+------------------------------------------------------------
+SLIDE 25 - Completeness, Contributions, Q&A
+Talk track:
+Our deliverable is complete: code, checkpoints, logs, figures, and reproducibility steps.
+Contributions are a deployable MindSpore pipeline, end-to-end reproducibility, and fair evaluation
+with blind evidence. Thank you, and we welcome your questions.
+Transition:
+"[Pause for Q&A.]"
+
+------------------------------------------------------------
+SLIDE 26 - Thank You / Huawei closing slide
+Talk track:
+Thank you for your time and evaluation.
+
+------------------------------------------------------------
+Q&A Handling (quick lines)
+- If asked about live deployment:
+  "Inference is designed for nearby compute nodes fed by router telemetry; this is the realistic production pattern."
+- If asked about fairness:
+  "We report macro-F1 and blind tests specifically to avoid imbalance-driven optimism from accuracy alone."
+- If asked about limitations:
+  "Current scope is SYN-flood binary detection; roadmap expands classes and domain adaptation."
+- If asked about reproducibility:
+  "All key results are script-backed and documented in reports and commands."
+
+------------------------------------------------------------
+Delivery tone tips
+- Opening: calm and confident
+- Middle (methods/results): precise and technical
+- Deployment slide: practical and honest
+- Closing: credible, concise, no hype

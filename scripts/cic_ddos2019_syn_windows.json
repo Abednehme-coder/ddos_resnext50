@@ -1,0 +1,16 @@
+{
+  "citation": "CIC-DDoS2019 attack time table; cite: I. Sharafaldin et al., Developing Realistic DDoS Attack Dataset and Taxonomy, IEEE Carnahan 2019. SYN windows copied from https://www.unb.ca/cic/datasets/ddos-2019.html",
+  "timezone": "America/Halifax",
+  "syn_windows": {
+    "training_day": [
+      { "start": "11:28", "end": "17:35" }
+    ],
+    "testing_day": [
+      { "start": "13:29", "end": "13:34" }
+    ]
+  },
+  "dd_mm_yyyy_to_cic_day": {
+    "03-11-2018": "training_day",
+    "01-12-2018": "testing_day"
+  }
+}

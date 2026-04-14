@@ -1,7 +1,8 @@
 import argparse
+import math
 import os
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 import numpy as np
 import mindspore as ms
 from mindspore import nn, ops
@@ -45,6 +46,17 @@ def find_project_root(start: Path) -> Path:
     return start
 
 
+def default_data_root(project_root: Path) -> str:
+    """Prefer 0.3s window images, then legacy per-packet images, else dataset/."""
+    w03 = project_root / "dataset" / "images_per_second_window_0p3"
+    if (w03 / "train").is_dir():
+        return str(w03)
+    images = project_root / "dataset" / "images"
+    if (images / "train").is_dir():
+        return str(images)
+    return str(project_root / "dataset")
+
+
 def build_class_indexing(train_dir: Path) -> dict:
     class_names = sorted([p.name for p in train_dir.iterdir() if p.is_dir()])
     if not class_names:
@@ -67,16 +79,57 @@ def count_images_per_class(train_dir: Path, class_indexing: dict) -> np.ndarray:
     return counts
 
 
-def compute_class_weights(class_counts: np.ndarray) -> np.ndarray:
+def compute_class_weights(class_counts: np.ndarray, minority_boost: float = 1.0) -> np.ndarray:
     counts = np.asarray(class_counts, dtype=np.float32)
     counts = np.maximum(counts, 1.0)
     total = float(np.sum(counts))
     weights = total / (len(counts) * counts)
+    if minority_boost and minority_boost != 1.0:
+        mi = int(np.argmin(counts))
+        weights[mi] *= float(minority_boost)
     weights = weights / float(np.mean(weights))
     return weights.astype(np.float32)
 
 
-def make_transforms(split: str, img_size: int, resize_size: Optional[int], augment: bool):
+def build_learning_rate_schedule(
+    schedule: str,
+    max_lr: float,
+    min_lr: float,
+    steps_per_epoch: int,
+    epochs: int,
+    warmup_epochs: int,
+) -> Union[float, list]:
+    """Per-step LR list for cosine (+ optional linear warmup), or scalar if disabled."""
+    if schedule != "cosine" or steps_per_epoch <= 0:
+        return max_lr
+    total_step = int(steps_per_epoch * epochs)
+    if total_step <= 0:
+        return max_lr
+    warmup_steps = int(warmup_epochs * steps_per_epoch) if warmup_epochs > 0 else 0
+    warmup_steps = min(max(warmup_steps, 0), total_step)
+    if warmup_steps == 0:
+        return nn.cosine_decay_lr(min_lr, max_lr, total_step, steps_per_epoch, epochs)
+    decay_steps = max(total_step - warmup_steps, 1)
+    lrs: list[float] = []
+    for i in range(total_step):
+        if i < warmup_steps:
+            lrs.append(max_lr * float(i + 1) / float(max(warmup_steps, 1)))
+        else:
+            j = i - warmup_steps
+            progress = j / float(max(decay_steps - 1, 1))
+            c = 0.5 * (1.0 + math.cos(math.pi * progress))
+            lrs.append(min_lr + (max_lr - min_lr) * c)
+    return lrs
+
+
+def make_transforms(
+    split: str,
+    img_size: int,
+    resize_size: Optional[int],
+    augment: bool,
+    crop_scale_min: float = 0.7,
+    crop_scale_max: float = 1.0,
+):
     def to_rgb_np(img):
         # img: HWC numpy array
         if img.ndim == 2:
@@ -92,7 +145,9 @@ def make_transforms(split: str, img_size: int, resize_size: Optional[int], augme
 
     if split == "train" and augment:
         if hasattr(vision, "RandomResizedCrop"):
-            ops_list.append(vision.RandomResizedCrop(img_size, scale=(0.8, 1.0)))
+            ops_list.append(
+                vision.RandomResizedCrop(img_size, scale=(crop_scale_min, crop_scale_max))
+            )
         else:
             ops_list.append(vision.Resize((img_size, img_size)))
         if hasattr(vision, "RandomHorizontalFlip"):
@@ -126,6 +181,8 @@ def make_dataset(
     resize_size: Optional[int],
     num_workers: int,
     augment: bool,
+    crop_scale_min: float = 0.7,
+    crop_scale_max: float = 1.0,
 ):
     split_dir = Path(data_root) / split
     if not split_dir.is_dir():
@@ -137,7 +194,9 @@ def make_dataset(
         dataset = ds.ImageFolderDataset(str(split_dir), shuffle=shuffle)
 
     dataset = dataset.map(
-        operations=make_transforms(split, img_size, resize_size, augment),
+        operations=make_transforms(
+            split, img_size, resize_size, augment, crop_scale_min, crop_scale_max
+        ),
         input_columns="image",
         num_parallel_workers=num_workers,
     )
@@ -229,6 +288,46 @@ class F1Score(Metric):
         raise ValueError(f"Unsupported average: {self.average}")
 
 
+class F1SingleClass(Metric):
+    """Macro F1 restricted to one class index (e.g. 0 = ddos when classes sorted as ddos, normal)."""
+
+    def __init__(self, num_classes: int, class_index: int, eps: float = 1e-12):
+        super().__init__()
+        self.num_classes = int(num_classes)
+        self.class_index = int(class_index)
+        self.eps = float(eps)
+        self.clear()
+
+    def clear(self):
+        self.tp = 0
+        self.fp = 0
+        self.fn = 0
+
+    def update(self, *inputs):
+        y_pred, y_true = inputs
+        if isinstance(y_pred, (tuple, list)):
+            y_pred = y_pred[0]
+        if hasattr(y_pred, "asnumpy"):
+            y_pred = y_pred.asnumpy()
+        if hasattr(y_true, "asnumpy"):
+            y_true = y_true.asnumpy()
+        if y_pred.ndim > 1:
+            y_pred = np.argmax(y_pred, axis=1)
+        y_pred = y_pred.reshape(-1)
+        y_true = y_true.reshape(-1)
+        c = self.class_index
+        pred_c = y_pred == c
+        true_c = y_true == c
+        self.tp += int(np.sum(pred_c & true_c))
+        self.fp += int(np.sum(pred_c & ~true_c))
+        self.fn += int(np.sum(~pred_c & true_c))
+
+    def eval(self):
+        prec = self.tp / (self.tp + self.fp + self.eps)
+        rec = self.tp / (self.tp + self.fn + self.eps)
+        return float(2 * prec * rec / (prec + rec + self.eps))
+
+
 class WeightedCrossEntropyLoss(nn.Cell):
     def __init__(self, class_weights: Optional[ms.Tensor]):
         super().__init__()
@@ -248,6 +347,30 @@ class WeightedCrossEntropyLoss(nn.Cell):
         w = self.gather(self.class_weights, labels, 0)
         weighted = per_example * w
         return self.reduce_sum(weighted) / (self.reduce_sum(w) + self.eps)
+
+
+class FocalLoss(nn.Cell):
+    """Focal modulator (1-p_t)^gamma * CE; optional per-class alpha from class_weights."""
+    def __init__(self, gamma: float, class_weights: Optional[ms.Tensor]):
+        super().__init__()
+        self.gamma = float(gamma)
+        self.class_weights = class_weights
+        self.ce = nn.SoftmaxCrossEntropyWithLogits(sparse=True, reduction="none")
+        self.cast = ops.Cast()
+        self.gather = ops.Gather()
+        self.reduce_mean = ops.ReduceMean()
+        self.eps = 1e-7
+
+    def construct(self, logits, labels):
+        labels = self.cast(labels, ms.int32)
+        ce = self.ce(logits, labels)
+        pt = ops.exp(-ce)
+        mod = ops.pow(1.0 - pt + self.eps, self.gamma)
+        loss = mod * ce
+        if self.class_weights is not None:
+            alpha = self.gather(self.class_weights, labels, 0)
+            loss = loss * alpha
+        return self.reduce_mean(loss)
 
 
 def load_ckpt(net, ckpt_path: str, strict: bool):
@@ -336,11 +459,14 @@ class EvalAndSaveBest(Callback):
 def build_model(
     model_name: str,
     num_classes: int,
-    lr: float,
+    learning_rate: Union[float, list],
     weight_decay: float,
     class_weights: Optional[ms.Tensor],
     ckpt_path: Optional[str],
     strict_load: bool,
+    loss_type: str = "ce",
+    focal_gamma: float = 2.0,
+    ddos_class_index: int = 0,
 ):
     net = create_model(
         model_name=model_name,
@@ -351,14 +477,19 @@ def build_model(
     if ckpt_path:
         load_ckpt(net, ckpt_path, strict=strict_load)
 
-    loss = WeightedCrossEntropyLoss(class_weights) if class_weights is not None else nn.SoftmaxCrossEntropyWithLogits(
-        sparse=True, reduction="mean"
-    )
+    if loss_type == "focal":
+        loss = FocalLoss(focal_gamma, class_weights)
+    elif class_weights is not None:
+        loss = WeightedCrossEntropyLoss(class_weights)
+    else:
+        loss = nn.SoftmaxCrossEntropyWithLogits(sparse=True, reduction="mean")
 
     if hasattr(nn, "AdamWeightDecay"):
-        optimizer = nn.AdamWeightDecay(net.trainable_params(), learning_rate=lr, weight_decay=weight_decay)
+        optimizer = nn.AdamWeightDecay(
+            net.trainable_params(), learning_rate=learning_rate, weight_decay=weight_decay
+        )
     else:
-        optimizer = nn.Adam(net.trainable_params(), learning_rate=lr)
+        optimizer = nn.Adam(net.trainable_params(), learning_rate=learning_rate)
 
     model = Model(
         net,
@@ -367,6 +498,7 @@ def build_model(
         metrics={
             "acc": Accuracy(),
             "f1": F1Score(num_classes=num_classes, average="macro"),
+            "f1_ddos": F1SingleClass(num_classes, ddos_class_index),
         },
     )
     return model, net
@@ -377,25 +509,84 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Train/Eval ResNeXt50 on packet images.")
     parser.add_argument(
         "--data-root",
-        default=str(project_root / "dataset"),
-        help="Dataset root with train/val/test (ImageFolder layout).",
+        default=default_data_root(project_root),
+        help="Dataset root with train/ (required). Default: dataset/images_per_second_window_0p3 if present, else dataset/images.",
+    )
+    parser.add_argument(
+        "--val-data-root",
+        default=None,
+        help="Optional root containing val/ (ImageFolder). Default: same as --data-root.",
+    )
+    parser.add_argument(
+        "--test-data-root",
+        default=None,
+        help="Optional root containing test/ (ImageFolder). Default: same as --data-root.",
     )
     parser.add_argument(
         "--output-dir",
         default=str(project_root / "model"),
-        help="Directory to save checkpoints (matches the /model folder in your project layout).",
+        help="Directory for checkpoints (ModelCheckpoint + *_best.ckpt). Use a new path per experiment.",
     )
     parser.add_argument("--model-name", default="resnext50_32x4d")
     parser.add_argument("--batch-size", type=int, default=16)
-    parser.add_argument("--epochs", type=int, default=8)
-    parser.add_argument("--lr", type=float, default=1e-3)
+    parser.add_argument("--epochs", type=int, default=30)
+    parser.add_argument("--lr", type=float, default=1e-3, help="Peak LR (cosine max) or constant LR when --lr-schedule none.")
+    parser.add_argument(
+        "--lr-schedule",
+        choices=["none", "cosine"],
+        default="cosine",
+        help="Training LR schedule (ignored for --eval-only).",
+    )
+    parser.add_argument("--min-lr", type=float, default=1e-6, help="Cosine floor (per-step schedule tail).")
+    parser.add_argument(
+        "--warmup-epochs",
+        type=int,
+        default=1,
+        help="Linear warmup epochs before cosine (only with --lr-schedule cosine).",
+    )
     parser.add_argument("--weight-decay", type=float, default=1e-4)
     parser.add_argument("--num-classes", type=int, default=None, help="Auto-inferred from train/ if omitted.")
     parser.add_argument("--img-size", type=int, default=224)
     parser.add_argument("--resize-size", type=int, default=256, help="Eval resize before center crop (set to 0 to disable).")
     parser.add_argument("--num-workers", type=int, default=8)
+    parser.add_argument(
+        "--crop-scale-min",
+        type=float,
+        default=0.7,
+        help="RandomResizedCrop min scale (train augment only).",
+    )
+    parser.add_argument(
+        "--crop-scale-max",
+        type=float,
+        default=1.0,
+        help="RandomResizedCrop max scale (train augment only).",
+    )
     parser.add_argument("--no-augment", action="store_true", help="Disable train-time augmentation.")
     parser.add_argument("--no-class-weights", action="store_true", help="Disable auto class-weighting.")
+    parser.add_argument(
+        "--minority-boost",
+        type=float,
+        default=1.0,
+        help="Extra multiplier on the minority class weight (when class weights are enabled).",
+    )
+    parser.add_argument(
+        "--loss",
+        choices=["ce", "focal"],
+        default="ce",
+        help="ce=weighted cross-entropy (if class weights); focal=Focal loss (needs class weights for alpha).",
+    )
+    parser.add_argument("--focal-gamma", type=float, default=2.0, help="Focal loss gamma (only --loss focal).")
+    parser.add_argument(
+        "--ddos-class-name",
+        default="ddos",
+        help="Folder name for attack class; used to set f1_ddos index (default: ddos).",
+    )
+    parser.add_argument(
+        "--early-stop-metric",
+        choices=["f1", "f1_ddos"],
+        default="f1",
+        help="Validation metric for best ckpt + early stopping: f1=macro F1, f1_ddos=F1 on the attack class only.",
+    )
     parser.add_argument("--ckpt", default=None, help="Optional checkpoint to load before train/eval.")
     parser.add_argument("--strict-load", action="store_true", help="Strict checkpoint loading (will error on shape mismatch).")
     parser.add_argument("--eval-only", action="store_true", help="Skip training, just evaluate.")
@@ -409,7 +600,12 @@ def parse_args():
     parser.add_argument("--device-id", type=int, default=0)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--dataset-sink", action="store_true", help="Enable dataset sink mode (often faster on Ascend).")
-    parser.add_argument("--early-stop", type=int, default=0, help="Early stop patience (0 disables). Uses val F1.")
+    parser.add_argument(
+        "--early-stop",
+        type=int,
+        default=5,
+        help="Early stop patience on val using --early-stop-metric (0 disables).",
+    )
     return parser.parse_args()
 
 
@@ -422,10 +618,17 @@ def main():
         ds.config.set_seed(args.seed)
 
     train_dir = Path(args.data_root) / "train"
+    val_root = args.val_data_root or args.data_root
+    test_root = args.test_data_root or args.data_root
     class_indexing = build_class_indexing(train_dir)
     num_classes = len(class_indexing) if args.num_classes is None else int(args.num_classes)
     if num_classes != len(class_indexing):
         print(f"WARNING: --num-classes={num_classes} but found {len(class_indexing)} classes in {train_dir}")
+
+    print(
+        f"Paths: train={args.data_root}/train | val={val_root}/val | test={test_root}/test | "
+        f"checkpoints={args.output_dir}"
+    )
 
     resize_size = None if args.resize_size == 0 else int(args.resize_size)
     augment = not args.no_augment
@@ -440,9 +643,11 @@ def main():
         resize_size,
         args.num_workers,
         augment,
+        crop_scale_min=args.crop_scale_min,
+        crop_scale_max=args.crop_scale_max,
     )
     val_ds = make_dataset(
-        args.data_root,
+        val_root,
         "val",
         args.batch_size,
         False,
@@ -451,9 +656,11 @@ def main():
         resize_size,
         args.num_workers,
         False,
+        crop_scale_min=args.crop_scale_min,
+        crop_scale_max=args.crop_scale_max,
     )
     test_ds = make_dataset(
-        args.data_root,
+        test_root,
         "test",
         args.batch_size,
         False,
@@ -462,28 +669,74 @@ def main():
         resize_size,
         args.num_workers,
         False,
+        crop_scale_min=args.crop_scale_min,
+        crop_scale_max=args.crop_scale_max,
     )
+
+    steps_per_epoch = train_ds.get_dataset_size()
+    if args.eval_only or args.lr_schedule == "none":
+        learning_rate: Union[float, list] = args.lr
+    else:
+        learning_rate = build_learning_rate_schedule(
+            args.lr_schedule,
+            args.lr,
+            args.min_lr,
+            int(steps_per_epoch) if steps_per_epoch else 0,
+            args.epochs,
+            args.warmup_epochs,
+        )
+    if isinstance(learning_rate, list):
+        print(
+            f"LR schedule: cosine, steps={len(learning_rate)}, "
+            f"first={learning_rate[0]:.2e} last={learning_rate[-1]:.2e}"
+        )
+    else:
+        print(f"LR: constant {learning_rate}")
 
     class_weights = None
     if not args.no_class_weights:
         class_counts = count_images_per_class(train_dir, class_indexing)
-        class_weights = ms.Tensor(compute_class_weights(class_counts), dtype=ms.float32)
-        print(f"Class counts: {class_counts.tolist()} | class weights: {class_weights.asnumpy().tolist()}")
+        class_weights = ms.Tensor(
+            compute_class_weights(class_counts, minority_boost=args.minority_boost),
+            dtype=ms.float32,
+        )
+        print(
+            f"Class counts: {class_counts.tolist()} | class weights: {class_weights.asnumpy().tolist()} "
+            f"(minority_boost={args.minority_boost})"
+        )
+
+    if args.loss == "focal" and class_weights is None:
+        raise ValueError("--loss focal requires class weights; remove --no-class-weights or use --loss ce.")
+
+    if args.ddos_class_name in class_indexing:
+        ddos_class_index = int(class_indexing[args.ddos_class_name])
+    else:
+        print(
+            f"WARNING: --ddos-class-name={args.ddos_class_name!r} not in {list(class_indexing.keys())}; "
+            f"using index 0 for f1_ddos."
+        )
+        ddos_class_index = 0
 
     model, net = build_model(
         model_name=args.model_name,
         num_classes=num_classes,
-        lr=args.lr,
+        learning_rate=learning_rate,
         weight_decay=args.weight_decay,
         class_weights=class_weights,
         ckpt_path=args.ckpt,
         strict_load=args.strict_load,
+        loss_type=args.loss,
+        focal_gamma=args.focal_gamma,
+        ddos_class_index=ddos_class_index,
     )
 
     if not args.eval_only:
-        print("\nStarting training...\n")
+        print(
+            f"\nStarting training: loss={args.loss}"
+            + (f" (gamma={args.focal_gamma})" if args.loss == "focal" else "")
+            + f" | early_stop_metric={args.early_stop_metric}\n"
+        )
         os.makedirs(args.output_dir, exist_ok=True)
-        steps_per_epoch = train_ds.get_dataset_size()
         if steps_per_epoch == 0:
             raise RuntimeError("Training dataset is empty. Check your dataset/train folder.")
 
@@ -493,7 +746,7 @@ def main():
             model=model,
             network=net,
             eval_dataset=val_ds,
-            metric_name="f1",
+            metric_name=args.early_stop_metric,
             ckpt_dir=args.output_dir,
             prefix=args.model_name,
             patience=(None if args.early_stop <= 0 else int(args.early_stop)),

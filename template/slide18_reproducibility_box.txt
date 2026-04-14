@@ -1,0 +1,9 @@
+Slide 18 Reproducibility Commands
+
+bash scripts/run_all_eval_0p3.sh
+bash scripts/run_all_paper_figures.sh
+
+Optional sources for audit:
+- reports/eval_results_per_second_0p3.md
+- reports/cross_domain_eval_2026-04-03.md
+- reports/REPRODUCIBILITY.md

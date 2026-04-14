@@ -4,3 +4,4 @@
 mindcv
 numpy
 Pillow
+pytest

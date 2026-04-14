@@ -23,6 +23,10 @@ _SCRIPT_DIR = Path(__file__).resolve().parent
 _REPO = _SCRIPT_DIR.parent
 if str(_REPO) not in sys.path:
     sys.path.insert(0, str(_REPO))
+if str(_SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPT_DIR))
+
+from eval_primary_ckpt import primary_ckpt_path, require_primary_ckpt_for_eval
 
 import mindspore as ms
 from mindspore import ops
@@ -74,13 +78,18 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Blind test: random images per class, model predicts without seeing labels.",
     )
-    default_data = project / "dataset"
-    if not (default_data / "train").is_dir() and (project / "dataset" / "images").is_dir():
-        default_data = project / "dataset" / "images"
-    if not (default_data / "train").is_dir():
-        fallback = Path.home() / "datasets" / "CICDDoS2019" / "images"
-        if (fallback / "train").is_dir():
-            default_data = fallback
+    w03 = project / "dataset" / "images_per_second_window_0p3"
+    legacy = project / "dataset" / "images"
+    if (w03 / "train").is_dir():
+        default_data = w03
+    elif (legacy / "train").is_dir():
+        default_data = legacy
+    else:
+        default_data = project / "dataset"
+        if not (default_data / "train").is_dir():
+            fallback = Path.home() / "datasets" / "CICDDoS2019" / "images"
+            if (fallback / "train").is_dir():
+                default_data = fallback
     parser.add_argument(
         "--data-root",
         type=Path,
@@ -90,7 +99,7 @@ def main() -> int:
     parser.add_argument(
         "--ckpt",
         type=Path,
-        default=project / "model" / "resnext50_32x4d_best.ckpt",
+        default=primary_ckpt_path(),
         help="Model checkpoint path.",
     )
     parser.add_argument(
@@ -131,6 +140,7 @@ def main() -> int:
         help="MindSpore device.",
     )
     args = parser.parse_args()
+    require_primary_ckpt_for_eval(args.ckpt)
 
     n_per_class = args.n_per_class
     if args.total is not None:

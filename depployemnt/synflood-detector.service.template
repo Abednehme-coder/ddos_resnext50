@@ -1,0 +1,21 @@
+[Unit]
+Description=Synflood detector (ResNeXt option-3 fusion)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+Restart=on-failure
+RestartSec=10
+
+# Ensure tcpdump can capture (usually requires CAP_NET_RAW; since we run as root, it works by default).
+ExecStart=/opt/synflood-detector/venv/bin/python /opt/synflood-detector/run_pipeline.py --live --interface eth0 --window-sec 2 --max-images-per-view 50 --capture-dir /var/capture --log-file /var/log/synflood-detector/detections.log
+
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+

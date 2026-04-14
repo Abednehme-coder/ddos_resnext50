@@ -1,0 +1,19 @@
+%% Slide 18: Precision-Recall curve (example shape; replace with real points)
+%%{init: {"theme":"base","themeVariables":{
+  "background":"transparent",
+  "textColor":"#FFFFFF",
+  "lineColor":"#FFFFFF",
+  "xyChart": {
+    "titleColor":"#FFFFFF",
+    "xAxisLabelColor":"#FFFFFF",
+    "yAxisLabelColor":"#FFFFFF",
+    "plotColorPalette":"#00C2C7,#6FE7EA"
+  }
+},
+"themeCSS": ".background, .plot, .plot rect, .chart, .chart rect { fill: transparent !important; } .x-axis path, .y-axis path, .x-axis line, .y-axis line, .tick line { stroke: #FFFFFF !important; } .x-axis text, .y-axis text, .axis-label, .chart-title, text { fill: #FFFFFF !important; }"
+}}%%
+xychart-beta
+    title "Precision-Recall Curve (Test)"
+    x-axis "Recall" [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
+    y-axis "Precision" 0 --> 1
+    line [1.0, 0.995, 0.992, 0.988, 0.982, 0.970]

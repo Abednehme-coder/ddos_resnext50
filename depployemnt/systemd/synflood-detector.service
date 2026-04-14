@@ -1,0 +1,20 @@
+# Canonical unit for Huawei ECS — keep in sync with run_pipeline.py CLI (repo root).
+# Install: see depployemnt/install_ecs_systemd.sh or OPERATIONS.md
+#
+[Unit]
+Description=Synflood detector (ResNeXt live pipeline, single-view all-packets)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Must match: python run_pipeline.py --help
+# Align PCAP window length with 0.3s time-window training (per_second_0p3_focal_v2). Tune --max-images-per-window if needed.
+ExecStart=/opt/synflood-detector/venv/bin/python /opt/synflood-detector/repo/run_pipeline.py --live --ckpt /opt/synflood-detector/repo/model/per_second_0p3_focal_v2/resnext50_32x4d_best.ckpt --interface eth0 --window-sec 0.3 --max-images-per-window 50 --batch-size 16 --capture-dir /var/capture --log-file /var/log/synflood-detector/detections.log --max-pending-pcaps 3 --poll-interval-sec 1.0
+WorkingDirectory=/opt/synflood-detector/repo
+Environment=PYTHONUNBUFFERED=1
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

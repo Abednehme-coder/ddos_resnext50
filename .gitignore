@@ -4,3 +4,8 @@ dataset/
 .venv/
 model/
 *.deb
+template/.~lock.*
+__pycache__/
+*.py[cod]
+model_allpackets/
+training_allpackets.log

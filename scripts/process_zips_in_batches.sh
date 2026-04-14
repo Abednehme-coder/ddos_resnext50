@@ -10,12 +10,33 @@
 #   IMG_ROOT       Output images here (default: ~/datasets/CICDDoS2019/images)
 #   STAGING_DIR    Where to unzip (default: $PCAP_ZIP_DIR/staging)
 #   REPO           Repo root (default: script's parent dir)
+#   CLASSIFY_METHOD   cic_schedule (default for this script) or syn_count — see convert_pcaps_to_images.sh
+#   CIC_SCHEDULE_CONFIG  Path to JSON schedule (default: $REPO/scripts/cic_ddos2019_syn_windows.json)
+#   CLEAN_TRAIN_IMAGES_FIRST  If set to 1, delete all *.png under train/ddos and train/normal before processing (fresh labels)
+#   PYTHON            e.g. $REPO/.venv/bin/python on servers where system python lacks deps
+#   PCAP_SAMPLE_STRATEGY  even (default) or sequential — see convert_pcaps_to_images.sh
+#   SYN_ONLY_DDOS     1 (default): ddos images from SYN packets only; 0: all packets for ddos too
+#   PACKETS_PER_IMAGE 10 (default): N eligible packets per image; set 1 for single-packet datasets
+#   CONVERSION_MODE   per_pcap (default) or per_second_window — see convert_pcaps_to_images.sh
+#   TIME_WINDOW_SECONDS  1 (default) for per_second_window
+#   WINDOW_LABEL_LOGIC   and (default) or or
 
 set -euo pipefail
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 REPO="${REPO:-$SCRIPT_DIR/..}"
 REPO=$(cd "$REPO" && pwd)
+CLASSIFY_METHOD="${CLASSIFY_METHOD:-cic_schedule}"
+CIC_SCHEDULE_CONFIG="${CIC_SCHEDULE_CONFIG:-$REPO/scripts/cic_ddos2019_syn_windows.json}"
+CLEAN_TRAIN_IMAGES_FIRST="${CLEAN_TRAIN_IMAGES_FIRST:-0}"
+PCAP_SAMPLE_STRATEGY="${PCAP_SAMPLE_STRATEGY:-even}"
+SYN_ONLY_DDOS="${SYN_ONLY_DDOS:-1}"
+PACKETS_PER_IMAGE="${PACKETS_PER_IMAGE:-10}"
+CONVERSION_MODE="${CONVERSION_MODE:-per_pcap}"
+TIME_WINDOW_SECONDS="${TIME_WINDOW_SECONDS:-1}"
+WINDOW_LABEL_LOGIC="${WINDOW_LABEL_LOGIC:-and}"
+export CLASSIFY_METHOD CIC_SCHEDULE_CONFIG PYTHON PCAP_SAMPLE_STRATEGY SYN_ONLY_DDOS PACKETS_PER_IMAGE
+export CONVERSION_MODE TIME_WINDOW_SECONDS WINDOW_LABEL_LOGIC
 PCAP_ZIP_DIR="${PCAP_ZIP_DIR:-$HOME/datasets/CICDDoS2019/PCAPs}"
 IMG_ROOT="${IMG_ROOT:-$HOME/datasets/CICDDoS2019/images}"
 STAGING_DIR="${STAGING_DIR:-$PCAP_ZIP_DIR/staging}"
@@ -83,11 +104,25 @@ process_one_zip() {
   echo "Done: $z"
 }
 
+clean_train_image_dirs() {
+  if [[ "$CLEAN_TRAIN_IMAGES_FIRST" != "1" ]]; then
+    return 0
+  fi
+  echo ""
+  echo "=== CLEAN_TRAIN_IMAGES_FIRST=1: removing old PNGs under $IMG_ROOT/train/ddos and .../normal ==="
+  mkdir -p "$IMG_ROOT/train/ddos" "$IMG_ROOT/train/normal"
+  find "$IMG_ROOT/train/ddos" -maxdepth 1 -type f -name '*.png' -delete
+  find "$IMG_ROOT/train/normal" -maxdepth 1 -type f -name '*.png' -delete
+  echo "Clean done."
+}
+
 main() {
   echo "Repo: $REPO"
   echo "PCAP zips dir: $PCAP_ZIP_DIR"
   echo "Image root: $IMG_ROOT"
   echo "Staging: $STAGING_DIR"
+  echo "CLASSIFY_METHOD=$CLASSIFY_METHOD CIC_SCHEDULE_CONFIG=$CIC_SCHEDULE_CONFIG CLEAN_TRAIN_IMAGES_FIRST=$CLEAN_TRAIN_IMAGES_FIRST PCAP_SAMPLE_STRATEGY=$PCAP_SAMPLE_STRATEGY SYN_ONLY_DDOS=$SYN_ONLY_DDOS PACKETS_PER_IMAGE=$PACKETS_PER_IMAGE CONVERSION_MODE=$CONVERSION_MODE TIME_WINDOW_SECONDS=$TIME_WINDOW_SECONDS WINDOW_LABEL_LOGIC=$WINDOW_LABEL_LOGIC"
+  clean_train_image_dirs
   for z in "${ZIPS[@]}"; do
     process_one_zip "$z"
   done

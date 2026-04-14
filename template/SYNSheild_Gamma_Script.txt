@@ -1,0 +1,275 @@
+Create a professional hybrid pitch + research deck titled:
+"SYNSheild: Huawei MindSpore + ResNeXt-50 for Early SYN-Flood DDoS Detection"
+
+Audience:
+- Huawei ICT Competition regional judges
+- Technical evaluators and innovation reviewers
+
+Tone and style:
+- Start with concise pitch clarity, then move into research rigor
+- Confident, technical, practical, and honest
+- Clean modern design with high contrast
+- Blue/cyan security-tech palette
+- Keep each slide concise (3-6 bullets max)
+
+Deck objective:
+Open with identity and value, then prove technical novelty, reproducibility, and deployability in a research-grade structure.
+
+---
+
+AUTHORITATIVE SLIDE ORDER (DEDUPLICATED V2 - use exactly)
+
+PHASE A - Opening and Framing
+1) Title + team
+2) Presentation outline
+3) Embedded hook scenario (show, not slogan)
+4) Introduction: background + motivation + scope
+5) Problem and motivation
+6) Stakes: without vs with SYNSheild
+7) Solution snapshot
+8) Innovation highlights
+9) Transition: from product value to research evidence
+
+PHASE B - Research Core
+10) Related work + research gap
+11) Research objectives + question/hypothesis
+12) System model and design (architecture + framework + workflow)
+13) Data and methodology (method + dataset + preprocessing + model design)
+14) Evaluation criteria + experimental setup
+15) Implementation environment + system requirements
+16) Sample input windows (normal vs DDoS)
+17) Performance results (headline metrics)
+18) Proof artifacts (ROC/PR/confusion matrix/calibration/repro logs)
+19) Comparative analysis (methods + CNN choices + image-based approaches)
+20) Discussion of findings + technical implications
+21) Huawei ecosystem fit + deployment model
+22) Honesty and limitations + future roadmap
+23) Completeness package + conclusion + close/Q&A
+
+---
+
+Slide 1 - Title + team
+- Title: SYNSheild
+- Subtitle: Huawei MindSpore + ResNeXt-50 for Early SYN-Flood DDoS Detection
+- Context: Huawei ICT Competition - Innovation (Regional)
+- Team:
+  - Wafik Ibrahim
+  - Mohammed Farhat
+  - Abed Al Rida Nehme
+  - Instructor: Ali Nassar
+  - Beirut Arab University (BAU), Lebanon
+- Date: 11 April 2026
+
+Slide 2 - Presentation outline
+- Part A: Problem-value framing
+- Part B: Research evidence and deployment realism
+- One line to judges: "We start practical, then move to formal research proof."
+
+Slide 3 - Embedded hook scenario
+- Suggested title: "A SYN flood in the first minute"
+- Timeline:
+  - T+0s normal traffic
+  - T+20s SYN rate rises
+  - T+45s half-open connections surge
+  - Service risk appears
+- Contrast:
+  - signatures-only can be noisy/late
+  - SYNSheild path: 0.3s windows -> image -> ResNeXt score + traceable logs
+
+Slide 4 - Introduction (Background, Motivation, Scope)
+- Background: protocol-level abuse keeps rising in operational networks
+- Motivation: earlier SYN-flood detection to support SOC decisions
+- Scope:
+  - in-scope: binary SYN-flood detection from traffic-window images
+  - out-of-scope (current phase): multi-attack taxonomy + automated mitigation loop
+
+Slide 5 - Problem and motivation
+- Problem statement: detect SYN-flood behavior early and reliably
+- Challenges:
+  - class imbalance
+  - traffic/domain shift
+  - latency and deployment constraints
+- Motivation: availability protection for education, business, and public services
+
+Slide 6 - Stakes (without vs with SYNSheild)
+- Without:
+  - brittle signature-only behavior under evolving traffic
+  - many prototypes lack blind testing and reproducibility
+- With SYNSheild:
+  - end-to-end pipeline from PCAP/ZIP to evaluation
+  - fair metrics (macro-F1), blind tests, reproducible logs
+  - Huawei-aligned framework path (MindSpore + mindcv)
+
+Slide 7 - Solution snapshot
+- Packet bytes -> grayscale time-window images -> ResNeXt-50 (MindSpore)
+- Output: DDoS vs normal with confidence scores/logging
+- End-to-end reproducible workflow
+
+Slide 8 - Innovation highlights
+- ResNeXt-50 (32x4d) for structured packet-image patterns
+- 0.3s time-window representation
+- imbalance-aware training + macro-F1 checkpointing
+- automated scripts from data prep to evaluation
+- evaluation rigor: test + blind + ROC/PR + cross-domain checks
+
+Slide 9 - Transition to research evidence
+- "From value proposition to research validation."
+- "Next slides follow standard research evaluation logic."
+
+Slide 10 - Related work + research gap
+- Existing families:
+  - rule/signature systems
+  - handcrafted-feature ML
+  - image-based CNN methods
+- Gap:
+  - accuracy-only reporting under imbalance
+  - limited blind evaluation
+  - fragmented/non-reproducible pipelines
+
+Slide 11 - Research objectives and hypothesis
+- Aim: build a deployable and reproducible early SYN-flood detector
+- Objectives:
+  - robust image representation from packet windows
+  - fair training/evaluation in MindSpore
+  - blind and cross-domain validation
+- Hypothesis:
+  - 0.3s window images + ResNeXt improve practical early-detection quality
+
+Slide 12 - System model and design
+- Architecture:
+  - traffic input -> SYN labeling -> image generation -> ResNeXt inference -> alert
+- Framework:
+  - modular script stages
+- Workflow:
+  - deterministic pipeline from raw traffic to reportable metrics
+
+Slide 13 - Data and methodology
+- Method:
+  - supervised binary classification
+- Data:
+  - PCAP/ZIP sources, train/val/test + blind split
+- Preprocessing:
+  - SYN-oriented parsing, windowing, 224x224 grayscale conversion
+- Model design:
+  - ResNeXt-50, imbalance-aware training, macro-F1 checkpointing
+
+Slide 14 - Evaluation criteria and experimental setup
+- Metrics:
+  - accuracy + macro-F1
+- Evidence:
+  - ROC and PR curves
+- Setup:
+  - controlled train/val/test protocol
+  - blind balanced set
+  - checkpoint selection by macro-F1
+
+Slide 15 - Implementation environment and requirements
+- Hardware:
+  - training tested on RTX 3070 class
+- Software:
+  - Python 3.10.x, CUDA-compatible stack (~11.6)
+- Frameworks:
+  - MindSpore 2.6.0 + mindcv 0.3.0
+- Critical reproducibility constraint:
+  - train/deploy representation must match exactly
+
+Slide 16 - Sample input windows
+- Show side-by-side:
+  - normal (syn0)
+  - DDoS-like high SYN (syn8204)
+- Caption:
+  - image representation exposes learnable attack structure
+- Placeholders:
+  - sample_normal.png
+  - sample_ddos.png
+
+Slide 17 - Performance results
+- Checkpoint:
+  - model/per_second_0p3_focal_v2/resnext50_32x4d_best.ckpt
+- Validation: 98.21% acc, 0.9399 macro-F1
+- Test: 98.10% acc, 0.9375 macro-F1
+- Blind (270 balanced): 98.9% acc, 0.9889 macro-F1
+
+Slide 18 - Proof artifacts (have / can generate)
+- Existing:
+  - ROC and PR figures
+  - checkpoints + logs + markdown reports
+- Add/Generate:
+  - confusion matrix (test + blind)
+  - per-class precision/recall table
+  - calibration/reliability plot
+- Repro commands:
+  - bash scripts/run_all_eval_0p3.sh
+  - bash scripts/run_all_paper_figures.sh
+
+Slide 19 - Comparative analysis
+- Against method families:
+  - rule-based
+  - handcrafted-feature ML
+  - prior CNN-style approaches
+- CNN design rationale:
+  - shallow CNN can underfit complex textures
+  - ResNeXt-50 offers stronger grouped feature learning
+- Key message:
+  - same image concept exists; our advantage is architecture + fair metrics + reproducible pipeline
+
+Slide 20 - Discussion and technical implications
+- Findings:
+  - strong separation quality with robust macro-F1
+  - blind performance supports robustness claims
+- Implications:
+  - useful for SOC early-warning workflows
+- Caution:
+  - threshold tuning and domain adaptation remain important
+
+Slide 21 - Huawei ecosystem fit and deployment
+- Ecosystem:
+  - MindSpore/mindcv aligned development path
+- Deployment pattern:
+  - router/switch telemetry export
+  - nearby edge/server inference node
+  - SOC alerts + confidence logs
+- Realism:
+  - practical pattern is telemetry + nearby inference, not CNN on every switch ASIC
+
+Slide 22 - Honesty, limitations, and roadmap
+- Known challenge:
+  - no GPU in some server environments
+- Mitigation:
+  - offline GPU benchmarks + CPU-compatible runs
+- Current limitation:
+  - primary focus on SYN-flood class
+- Roadmap:
+  - near: latency profiling + threshold policies
+  - mid: multi-attack + domain adaptation
+  - long: deeper cloud-edge orchestration
+
+Slide 23 - Completeness, conclusion, and Q&A
+- Completeness package:
+  - slides/report, scripts, checkpoints, figures/logs, repro instructions
+- Key contributions:
+  - deployable MindSpore pipeline
+  - reproducible end-to-end workflow
+  - fair/rigorous evaluation with blind evidence
+- Final close:
+  - innovation + credibility + deployment realism
+  - Thank you - Q&A
+
+Optional backup slides (appendix):
+- Exact metrics source files:
+  - reports/eval_results_per_second_0p3.md
+  - reports/cross_domain_eval_2026-04-03.md
+  - reports/REPRODUCIBILITY.md
+- Script/module references:
+  - scripts/classify_pcap_syn.py
+  - scripts/pcap_to_images.py
+  - notebook/train_resnext.py
+  - scripts/eval_test_detailed.py
+  - scripts/blind_test_random.py
+
+Final formatting instructions for Gamma:
+- Use the "AUTHORITATIVE SLIDE ORDER (DEDUPLICATED V2)" exactly
+- Slide 1 must be title/team, Slide 2 must be outline
+- Keep the transition explicit on Slide 9
+- Favor visuals/tables for methods and comparisons
+- Use callouts for headline metrics and proof artifacts

@@ -1,0 +1,13 @@
+# run_all_paper_figures.sh — 2026-04-03
+
+Checkpoint: model/per_second_0p3_focal_v2/resnext50_32x4d_best.ckpt
+
+Outputs:
+- research/figures/roc_test.pdf
+- research/figures/pr_test.pdf
+- research/figures/threshold_f1_test.pdf
+  - Best threshold (max F1 heuristic): 0.8700, F1≈0.9470
+- research/figures/confusion_heatmap_test.pdf
+  - ECE (approx., test): 0.0741
+
+Command: bash scripts/run_all_paper_figures.sh (GPU, CUDA paths as in run_all_eval_0p3.sh)

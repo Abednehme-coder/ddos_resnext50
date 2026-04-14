@@ -1,0 +1,168 @@
+SYNSheild Visual Requirements (from SYNSheild_Gamma_Script.txt)
+
+Purpose:
+- Identify which slides require a visual asset.
+- Define the nature of the visual: image, diagram, chart, table, or optional icon support.
+- Mark priority: REQUIRED / RECOMMENDED / OPTIONAL.
+
+Legend:
+- REQUIRED: slide should not be shown as text-only.
+- RECOMMENDED: visual strongly improves clarity.
+- OPTIONAL: text-first slide; visual is nice-to-have only.
+
+---
+
+Slide 1 - Title + team
+- Visual nature: Branding image or subtle cyber background
+- Priority: OPTIONAL
+- Notes: Keep clean; do not distract from title and team names.
+
+Slide 2 - Presentation outline
+- Visual nature: Section flow graphic (Part A -> Part B)
+- Priority: OPTIONAL
+- Notes: A simple 2-block layout is enough.
+
+Slide 3 - Embedded hook scenario
+- Visual nature: Timeline diagram OR split before/after panel
+- Priority: REQUIRED
+- Notes:
+  - Show T+0, T+20, T+45 progression.
+  - Include contrast: signatures-only vs SYNSheild path.
+
+Slide 4 - Introduction (Background, Motivation, Scope)
+- Visual nature: Scope boundary diagram (in-scope vs out-of-scope)
+- Priority: RECOMMENDED
+- Notes: One clean boundary graphic avoids long text.
+
+Slide 5 - Problem and motivation
+- Visual nature: Problem-impact diagram (availability risk chain)
+- Priority: RECOMMENDED
+- Notes: Show challenge triad: imbalance, domain shift, latency.
+
+Slide 6 - Stakes (without vs with SYNSheild)
+- Visual nature: Two-column comparison table/card layout
+- Priority: REQUIRED
+- Notes: Left = without, Right = with SYNSheild.
+
+Slide 7 - Solution snapshot
+- Visual nature: End-to-end pipeline diagram
+- Priority: REQUIRED
+- Notes:
+  - PCAP -> windows -> grayscale images -> ResNeXt -> alert/log.
+  - Keep horizontal left-to-right flow.
+
+Slide 8 - Innovation highlights
+- Visual nature: 4-5 icon cards (architecture, windows, training, automation, evaluation)
+- Priority: RECOMMENDED
+- Notes: This is better as "innovation cards" than bullets.
+
+Slide 9 - Transition to research evidence
+- Visual nature: Minimal divider slide graphic
+- Priority: OPTIONAL
+- Notes: Keep mostly text with one transition icon.
+
+Slide 10 - Related work + research gap
+- Visual nature: Comparison matrix/table
+- Priority: REQUIRED
+- Notes:
+  - Rows: rule-based, handcrafted ML, image-CNN.
+  - Columns: strengths, limitations, gap addressed.
+
+Slide 11 - Research objectives and hypothesis
+- Visual nature: Goal tree / objective hierarchy
+- Priority: RECOMMENDED
+- Notes: Aim -> objectives -> hypothesis relationship.
+
+Slide 12 - System model and design
+- Visual nature: Architecture/workflow diagram
+- Priority: REQUIRED
+- Notes: Explicit modules and data flow arrows.
+
+Slide 13 - Data and methodology
+- Visual nature: Method pipeline + dataset split chart
+- Priority: REQUIRED
+- Notes:
+  - Diagram for preprocessing/model flow.
+  - Mini chart for train/val/test/blind partition.
+
+Slide 14 - Evaluation criteria and experimental setup
+- Visual nature: Metric cards + experiment setup schematic
+- Priority: RECOMMENDED
+- Notes: Highlight macro-F1, accuracy, ROC, PR, blind protocol.
+
+Slide 15 - Implementation environment and requirements
+- Visual nature: Stack diagram / hardware-software table
+- Priority: RECOMMENDED
+- Notes: GPU, Python/CUDA, MindSpore/mindcv, reproducibility constraint.
+
+Slide 16 - Sample input windows
+- Visual nature: Two real images side-by-side
+- Priority: REQUIRED
+- Notes:
+  - sample_normal.png vs sample_ddos.png.
+  - Add short caption only.
+
+Slide 17 - Performance results
+- Visual nature: Metric bar chart or KPI cards
+- Priority: REQUIRED
+- Notes:
+  - Validation, Test, Blind results.
+  - Emphasize macro-F1 and blind score.
+
+Slide 18 - Proof artifacts (have / can generate)
+- Visual nature: Multi-panel evidence board
+- Priority: REQUIRED
+- Notes:
+  - ROC chart, PR chart, confusion matrix, calibration plot.
+  - Add one small reproducibility box with commands.
+
+Slide 19 - Comparative analysis
+- Visual nature: Comparative table + one small chart
+- Priority: REQUIRED
+- Notes:
+  - Compare method families and CNN design rationale.
+
+Slide 20 - Discussion and technical implications
+- Visual nature: Findings-to-implications flow diagram
+- Priority: RECOMMENDED
+- Notes: Keep concise; include caution callout.
+
+Slide 21 - Huawei ecosystem fit and deployment
+- Visual nature: Deployment architecture diagram
+- Priority: REQUIRED
+- Notes:
+  - Router telemetry -> edge/server inference -> SOC alerts.
+  - Include "realism" note on nearby inference.
+
+Slide 22 - Honesty, limitations, and roadmap
+- Visual nature: 3-lane roadmap timeline + risk/mitigation box
+- Priority: REQUIRED
+- Notes:
+  - Lane 1: near term
+  - Lane 2: mid term
+  - Lane 3: long term
+
+Slide 23 - Completeness, conclusion, and Q&A
+- Visual nature: Checklist cards + closing badge
+- Priority: RECOMMENDED
+- Notes: Show completeness package and 3 key contributions.
+
+---
+
+Minimum must-have visuals (if time is limited):
+- Slide 3 (hook timeline)
+- Slide 6 (without vs with comparison)
+- Slide 7 (solution pipeline)
+- Slide 10 (related-work gap matrix)
+- Slide 12 (system architecture)
+- Slide 16 (sample images)
+- Slide 17 (headline metrics)
+- Slide 18 (ROC/PR/confusion/calibration)
+- Slide 19 (comparative analysis)
+- Slide 21 (Huawei deployment architecture)
+- Slide 22 (limitations + roadmap)
+
+Suggested chart/image generation priority:
+1) Slides 17, 18, 19 (proof and comparison)
+2) Slides 7, 12, 21 (pipeline and deployment)
+3) Slides 3, 6, 16 (story clarity and intuition)

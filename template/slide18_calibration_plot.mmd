@@ -1,0 +1,16 @@
+%% Slide 18: Calibration / reliability (example bins; replace with real values)
+%%{init: {"theme":"base","themeVariables":{
+  "background":"#0B2235",
+  "textColor":"#EAF4FF",
+  "xyChart": {
+    "titleColor":"#EAF4FF",
+    "xAxisLabelColor":"#EAF4FF",
+    "yAxisLabelColor":"#EAF4FF",
+    "plotColorPalette":"#00C2C7,#6FE7EA"
+  }
+}}}%%
+xychart-beta
+    title "Calibration Plot (Reliability)"
+    x-axis "Predicted Probability" [0.1, 0.2, 0.4, 0.6, 0.8, 0.9]
+    y-axis "Observed Frequency" 0 --> 1
+    line [0.11, 0.19, 0.39, 0.61, 0.79, 0.90]

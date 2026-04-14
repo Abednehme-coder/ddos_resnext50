@@ -1,0 +1,20 @@
+%%{init: {"theme":"base","themeVariables":{
+  "background":"#0B2235",
+  "primaryColor":"#102F45",
+  "primaryTextColor":"#EAF4FF",
+  "primaryBorderColor":"#00C2C7",
+  "lineColor":"#00C2C7",
+  "secondaryColor":"#0F2A3E",
+  "tertiaryColor":"#13364F"
+}}}%%
+flowchart LR
+    A[PCAP/ZIP Sources] --> B[SYN-Oriented Parsing]
+    B --> C[Time Windowing 0.3s]
+    C --> D[224x224 Grayscale Encoding]
+    D --> E[Dataset Split]
+    E --> F[ResNeXt-50 Training]
+    F --> G[Validation and Checkpointing]
+    G --> H[Test and Blind Evaluation]
+
+    classDef stage fill:#102F45,stroke:#00C2C7,stroke-width:1.5px,color:#EAF4FF;
+    class A,B,C,D,E,F,G,H stage;

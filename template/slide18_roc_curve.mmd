@@ -1,0 +1,19 @@
+%% Slide 18: ROC curve (example shape; replace with real points if available)
+%%{init: {"theme":"base","themeVariables":{
+  "background":"transparent",
+  "textColor":"#FFFFFF",
+  "lineColor":"#FFFFFF",
+  "xyChart": {
+    "titleColor":"#FFFFFF",
+    "xAxisLabelColor":"#FFFFFF",
+    "yAxisLabelColor":"#FFFFFF",
+    "plotColorPalette":"#00C2C7,#6FE7EA"
+  }
+},
+"themeCSS": ".background, .plot, .plot rect, .chart, .chart rect { fill: transparent !important; } .x-axis path, .y-axis path, .x-axis line, .y-axis line, .tick line { stroke: #FFFFFF !important; } .x-axis text, .y-axis text, .axis-label, .chart-title, text { fill: #FFFFFF !important; }"
+}}%%
+xychart-beta
+    title "ROC Curve (Test)"
+    x-axis "False Positive Rate" [0.0, 0.05, 0.1, 0.2, 0.4, 1.0]
+    y-axis "True Positive Rate" 0 --> 1
+    line [0.0, 0.82, 0.91, 0.96, 0.99, 1.0]

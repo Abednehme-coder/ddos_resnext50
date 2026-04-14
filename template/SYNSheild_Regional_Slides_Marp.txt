@@ -1,0 +1,240 @@
+---
+marp: true
+theme: default
+paginate: true
+title: "SYNSheild - Huawei MindSpore + ResNeXt-50"
+description: "Regional Innovation Competition Presentation"
+---
+
+# SYNSheild
+## Huawei MindSpore + ResNeXt-50 for Early SYN-Flood DDoS Detection
+
+Huawei ICT Competition - Innovation (Regional)
+
+- Wafik Ibrahim
+- Mohammed Farhat
+- Abed Al Rida Nehme
+- Instructor: Ali Nassar
+- Beirut Arab University (BAU), Lebanon
+- 11 April 2026
+
+---
+
+# Problem & Value
+
+- SYN-flood DDoS attacks reduce service availability
+- Rule/signature defenses are fast but can be brittle in dynamic traffic
+- Security teams need AI support that is:
+  - accurate
+  - reproducible
+  - deployable
+
+**Regional value:** stronger resilience for education, business, and public digital services.
+
+---
+
+# Current Methods vs Our Approach
+
+## Today
+1. Rule-based / signatures
+   - + simple, lightweight
+   - - weaker generalization
+2. Classical ML + handcrafted features
+   - + explainable
+   - - heavy feature engineering
+3. CNN image-based approaches
+   - + better automatic feature learning
+   - - often weaker ecosystem/deployment alignment
+
+## Ours
+- Packet bytes -> grayscale window images -> ResNeXt-50 in MindSpore
+- End-to-end reproducible pipeline
+
+---
+
+# Innovation Highlights
+
+- **Architecture:** ResNeXt-50 (32x4d)
+- **Representation:** primary model on **0.3 s** time-window images
+- **Training strategy:** class-imbalance aware + macro-F1 checkpointing
+- **System engineering:** automated scripts from ZIP/PCAP to final evaluation
+- **Evaluation rigor:** blind tests + ROC/PR + cross-domain checks
+
+**Innovation = model + reproducible full system.**
+
+---
+
+# Huawei Ecosystem Compatibility
+
+- Built with **Huawei MindSpore 2.6.0** + **mindcv**
+- Graph-execution friendly pipeline design
+- Huawei-aligned AI development stack
+- Clear scaling path toward Huawei ecosystem deployment models
+
+**Huawei role in this project:** core framework enabling training, evaluation, and reproducibility.
+
+---
+
+# End-to-End Pipeline
+
+PCAP traffic -> SYN-oriented labeling -> 224x224 grayscale images -> ResNeXt-50 -> DDoS / Normal
+
+Main modules:
+- `scripts/classify_pcap_syn.py`
+- `scripts/pcap_to_images.py`
+- `notebook/train_resnext.py`
+- `scripts/eval_test_detailed.py`
+- `scripts/blind_test_random.py`
+
+---
+
+# Sample Input Windows
+
+Left: normal (syn0)
+Right: DDoS (high SYN count, syn8204)
+
+![bg left:48% fit](../ict_innovation_overleaf/figures/sample_normal.png)
+![bg right:48% fit](../ict_innovation_overleaf/figures/sample_ddos.png)
+
+---
+
+# Primary Results (0.3 s model)
+
+Checkpoint:
+`model/per_second_0p3_focal_v2/resnext50_32x4d_best.ckpt`
+
+- Validation: **98.21% acc**, **0.9399 macro-F1**
+- Test: **98.10% acc**, **0.9375 macro-F1**
+- Blind test (270 balanced): **98.9% acc**, **0.9889 macro-F1**
+
+Why this matters: strong performance with reproducible scripts and logs.
+
+---
+
+# ROC and PR Curves
+
+![bg left:49% contain](../ict_innovation_overleaf/figures/roc_test.pdf)
+![bg right:49% contain](../ict_innovation_overleaf/figures/pr_test.pdf)
+
+---
+
+# Comparison with Other Methods
+
+| Method | Strength | Limitation | Our advantage |
+|---|---|---|---|
+| Rule-based only | Fast, simple | brittle under variation | Better pattern learning |
+| Handcrafted-feature ML | Explainable | heavy feature design | Less manual engineering |
+| Prior CNN baselines | strong concept | ecosystem/deployment gaps | ResNeXt + MindSpore + full pipeline |
+
+Also: majority-class baseline can look accurate under imbalance; macro-F1 gives fairer security quality.
+
+---
+
+# Deployment: Server + Early Network Detection
+
+## Current practical deployment
+- Inference service on server (batch / near-real-time)
+- Logs + confidence scores for SOC workflows
+
+## Early detection with switches/routers
+- Switch/router exports telemetry (NetFlow/sFlow/packet mirroring)
+- Edge collector prepares windows/features
+- Model inference on nearby compute node (server/edge AI box)
+- Alerts sent early to SOC/controller
+
+**Key point:** most routers/switches do not run full CNN inference directly; best design is telemetry + nearby inference compute.
+
+---
+
+# System Requirements (Optimal)
+
+## Training / full eval
+- GPU class: NVIDIA (tested on RTX 3070)
+- CUDA-compatible stack (~11.6)
+- Python 3.10.x
+- MindSpore 2.6.0, mindcv 0.3.0
+
+## Inference
+- CPU possible for low throughput
+- GPU/accelerator preferred for lower latency and scale
+
+## Critical requirement
+- Train and deploy image representation must match (same windowing pipeline).
+
+---
+
+# Challenge We Faced: No GPU on Server
+
+Problem:
+- Some server environments had no GPU acceleration
+
+Impact:
+- Slower iteration cycles
+- Higher latency at heavier load
+- Harder rapid calibration in production-like setting
+
+Mitigation:
+- Kept authoritative offline GPU benchmarks
+- Used CPU-compatible runs where needed
+- Clearly separated validated offline metrics from live unlabeled traffic behavior
+
+---
+
+# Roadmap / Enhancements
+
+Near term:
+- Align live pipeline windowing exactly with training representation
+- Add CPU vs GPU latency/throughput table
+- Improve threshold policies per deployment environment
+
+Mid term:
+- Extend beyond SYN flood to multi-attack classes
+- Domain adaptation for better cross-network generalization
+
+Long term:
+- Deeper Huawei ecosystem scaling (cloud + edge orchestration)
+- Controlled mitigation loop with human-in-the-loop decisions
+
+---
+
+# Completeness & Demonstrability
+
+Submission package includes:
+- Slides + report
+- Reproducible code/scripts
+- Saved checkpoints
+- Evaluation logs and figures
+- Reproduction instructions
+- Optional open-source proof screenshot
+
+This supports competition criteria: innovation, application value, completeness, and credible presentation.
+
+---
+
+# Why SYNSheild Can Win
+
+- Strong innovation + practical system engineering
+- High performance with transparent reporting
+- Huawei-aligned stack (MindSpore + mindcv)
+- Clear deployment story from server to early network-edge detection architecture
+- Honest limitations + concrete improvement plan
+
+## Thank you - Q&A
+
+---
+
+# Backup: Exact Metrics Source
+
+Use these files for judge Q&A precision:
+- `reports/eval_results_per_second_0p3.md`
+- `reports/cross_domain_eval_2026-04-03.md`
+- `reports/REPRODUCIBILITY.md`
+
+---
+
+# Backup: Repro Commands
+
+```bash
+bash scripts/run_all_eval_0p3.sh
+bash scripts/run_all_paper_figures.sh
+```
