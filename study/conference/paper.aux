@@ -1,0 +1,102 @@
+\relax 
+\citation{sharafaldin2018developing}
+\citation{bazzi2020resnet,lotfollahi2020deep}
+\citation{bazzi2020resnet}
+\citation{xie2017aggregated}
+\citation{mindspore}
+\citation{mindcv}
+\citation{lin2017focal}
+\citation{sharafaldin2018developing}
+\citation{mirsky2019kitsune}
+\citation{vinayakumar2019deep}
+\citation{niyaz2016deep}
+\citation{lotfollahi2020deep}
+\citation{bazzi2020resnet}
+\citation{cicddos2019}
+\citation{he2016deep}
+\citation{xie2017aggregated}
+\@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}{}\protected@file@percent }
+\newlabel{sec:intro}{{I}{1}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {II}Related Work}{1}{}\protected@file@percent }
+\newlabel{sec:related}{{II}{1}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-A}}DDoS Detection: Classical and Feature-Based Methods}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-B}}Deep Learning for Network Intrusion Detection}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-C}}Packet-to-Image Representations}{1}{}\protected@file@percent }
+\citation{mirsky2019kitsune}
+\citation{bazzi2020resnet}
+\citation{cicddos2019}
+\citation{bazzi2020resnet}
+\citation{xie2017aggregated}
+\citation{mindcv}
+\citation{xie2017aggregated}
+\citation{lin2017focal}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-D}}Summary Comparison}{2}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Qualitative comparison with representative detection approaches.}}{2}{}\protected@file@percent }
+\newlabel{tab:related}{{I}{2}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {III}System Design and Methodology}{2}{}\protected@file@percent }
+\newlabel{sec:method}{{III}{2}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-A}}Dataset}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-B}}PCAP Labeling}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-C}}Packet-to-Image Encoding}{2}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Representative $224\times 224$ grayscale packet images from the primary 0.3\,s time-window pipeline on CICDDoS2019.}}{2}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {Normal (benign) traffic}}}{2}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {SYN-flood DDoS traffic}}}{2}{}\protected@file@percent }
+\newlabel{fig:samples}{{1}{2}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-D}}Time-Window Aggregation}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-E}}Model Architecture}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-F}}End-to-End Pipeline}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-G}}Training Configuration}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {IV}Experimental Results}{2}{}\protected@file@percent }
+\newlabel{sec:results}{{IV}{2}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-A}}Experimental Setup}{2}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces End-to-end \textit  {SYNSheild} pipeline: raw network captures to inference decision via packet-image classification.}}{3}{}\protected@file@percent }
+\newlabel{fig:pipeline}{{2}{3}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces Primary training hyperparameters (\texttt  {per\_second\_0p3\_focal\_v2}).}}{3}{}\protected@file@percent }
+\newlabel{tab:hyper}{{II}{3}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-B}}Primary Model: 0.3\,s Time-Window}{3}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces Overall metrics for the primary 0.3\,s window model.}}{3}{}\protected@file@percent }
+\newlabel{tab:mainresults}{{III}{3}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-C}}Confusion Matrices}{3}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {IV}{\ignorespaces Confusion matrices (rows = true class, cols = predicted class).}}{3}{}\protected@file@percent }
+\newlabel{tab:confusion}{{IV}{3}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-D}}Per-Class Precision, Recall, and F1}{3}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {V}{\ignorespaces Per-class precision, recall, and F1 on validation and test.}}{3}{}\protected@file@percent }
+\newlabel{tab:perclass}{{V}{3}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Per-class precision, recall, and F1 on the test split. DDoS recall = 1.000 reflects zero missed attacks.}}{3}{}\protected@file@percent }
+\newlabel{fig:barchart}{{3}{3}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-E}}Blind Test}{3}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-F}}ROC, Precision--Recall, and Calibration}{4}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces ROC and precision--recall curves for the primary 0.3\,s model on the test split (via \texttt  {run\_all\_paper\_figures.sh}).}}{4}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {ROC curve}}}{4}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {Precision--recall curve}}}{4}{}\protected@file@percent }
+\newlabel{fig:rocpr}{{4}{4}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Test-split diagnostics: confusion heatmap (left) and F1 score as a function of the DDoS probability threshold (right). The heuristic max-F1 threshold is $\approx 0.87$.}}{4}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {Confusion matrix heatmap}}}{4}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {Threshold vs.\ F1 sweep}}}{4}{}\protected@file@percent }
+\newlabel{fig:diag}{{5}{4}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-G}}Comparison with Baselines}{4}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {V}Discussion}{4}{}\protected@file@percent }
+\newlabel{sec:discussion}{{V}{4}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-A}}Cross-Domain Representation Mismatch}{4}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {VI}{\ignorespaces Performance comparison across configurations on respective test sets.}}{4}{}\protected@file@percent }
+\newlabel{tab:baseline}{{VI}{4}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-B}}Operational Considerations}{4}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-C}}Limitations}{4}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {VI}Conclusion and Future Work}{4}{}\protected@file@percent }
+\newlabel{sec:conclusion}{{VI}{4}{}{}{}}
+\bibstyle{unsrt}
+\bibdata{references}
+\bibcite{sharafaldin2018developing}{1}
+\bibcite{bazzi2020resnet}{2}
+\bibcite{lotfollahi2020deep}{3}
+\bibcite{xie2017aggregated}{4}
+\bibcite{mindspore}{5}
+\bibcite{mindcv}{6}
+\bibcite{lin2017focal}{7}
+\bibcite{mirsky2019kitsune}{8}
+\bibcite{vinayakumar2019deep}{9}
+\bibcite{niyaz2016deep}{10}
+\bibcite{cicddos2019}{11}
+\bibcite{he2016deep}{12}
+\@writefile{toc}{\contentsline {section}{References}{5}{}\protected@file@percent }
+\gdef \@abspage@last{5}

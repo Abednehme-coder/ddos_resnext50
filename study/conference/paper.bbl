@@ -1,0 +1,78 @@
+\begin{thebibliography}{10}
+
+\bibitem{sharafaldin2018developing}
+Arash Sharafaldin, Arash~Habibi Lashkari, and Ali~A. Ghorbani.
+\newblock Toward generating a new intrusion detection dataset and intrusion
+  traffic characterization.
+\newblock Proceedings of ICISSP, 2018.
+
+\bibitem{bazzi2020resnet}
+R.~Bazzi and colleagues.
+\newblock Resnet-based detection of {SYN} flood {DDoS} attacks.
+\newblock Beirut Arab University (methodological basis for packet-to-image
+  representation), 2020.
+
+\bibitem{lotfollahi2020deep}
+Mohsen Lotfollahi, Mahdi~Jafari Siavoshani, Ramin~Shirali Zade, and Ali
+  Kheradmand.
+\newblock Deep packet: A novel approach for encrypted traffic classification
+  using deep learning.
+\newblock {\em Soft Computing}, 24(3):1999--2012, 2020.
+
+\bibitem{xie2017aggregated}
+Saining Xie, Ross Girshick, Piotr Doll{\'a}r, Zhuowen Tu, and Kaiming He.
+\newblock Aggregated residual transformations for deep neural networks.
+\newblock In {\em Proceedings of the IEEE Conference on Computer Vision and
+  Pattern Recognition (CVPR)}, pages 1492--1500, 2017.
+
+\bibitem{mindspore}
+{Huawei Technologies Co., Ltd.}
+\newblock {Huawei MindSpore}.
+\newblock \url{https://www.mindspore.cn/en}, 2020.
+\newblock Open-source deep learning framework; ongoing releases.
+
+\bibitem{mindcv}
+{MindSpore Lab}.
+\newblock mindcv: {MindSpore} computer vision toolkit.
+\newblock \url{https://github.com/mindspore-lab/mindcv}, 2022.
+\newblock Model zoo and training utilities for MindSpore.
+
+\bibitem{lin2017focal}
+Tsung-Yi Lin, Priya Goyal, Ross Girshick, Kaiming He, and Piotr Doll{\'a}r.
+\newblock Focal loss for dense object detection.
+\newblock {\em IEEE Transactions on Pattern Analysis and Machine Intelligence},
+  42(2):318--327, 2020.
+
+\bibitem{mirsky2019kitsune}
+Yisroel Mirsky, Tomer Doitshman, Yuval Elovici, and Asaf Shabtai.
+\newblock Kitsune: An ensemble of autoencoders for online network intrusion
+  detection.
+\newblock In {\em Network and Distributed System Security Symposium (NDSS)},
+  2018.
+
+\bibitem{vinayakumar2019deep}
+R.~Vinayakumar, M.~Alazab, K.~P. Soman, P.~Poornachandran, A.~Al-Nemrat, and
+  S.~Venkatraman.
+\newblock Deep learning approach for intelligent intrusion detection system.
+\newblock {\em IEEE Access}, 7:41525--41550, 2019.
+
+\bibitem{niyaz2016deep}
+Quamar Niyaz, Weiqing Sun, and Ahmad~Y. Javaid.
+\newblock A deep learning based {DDoS} detection system in software-defined
+  networking.
+\newblock In {\em EAI International Conference on Security and Privacy in
+  Communication Networks}, 2016.
+
+\bibitem{cicddos2019}
+{Canadian Institute for Cybersecurity}.
+\newblock {CICDDoS2019 Dataset}.
+\newblock \url{https://www.unb.ca/cic/datasets/ddos-dataset2019.html}, 2019.
+\newblock Accessed 2026.
+
+\bibitem{he2016deep}
+Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun.
+\newblock Deep residual learning for image recognition.
+\newblock In {\em Proceedings of the IEEE Conference on Computer Vision and
+  Pattern Recognition (CVPR)}, pages 770--778, 2016.
+
+\end{thebibliography}
